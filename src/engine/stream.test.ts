@@ -32,6 +32,7 @@ describe('MarketStream Engine', () => {
     expect(batch2[0].type).toBe('ob_delta');
 
     const batch3 = stream.nextBatch(1);
-    expect(batch3.length).toBe(0);
+    expect(batch3.length).toBe(1);
+    expect(batch3[0].seq).toBe(1);
   });
 });
