@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Switch, Text, View } from 'react-native';
+import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
 
 interface WalletRow {
@@ -18,7 +19,6 @@ export default function WalletScreen() {
   const [hideSmall, setHideSmall] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load persistence
   useEffect(() => {
       (async () => {
           const stored = await AsyncStorage.getItem(STORAGE_KEY_HIDE_SMALL);
@@ -56,14 +56,10 @@ export default function WalletScreen() {
   const filteredBalances = balances.filter(b => {
       if (!hideSmall) return true;
       const total = b.available + b.locked;
-      // Simple threshold, or 0. Since seed data has like 10000, small is relative.
-      // Task requirement said: filters out < 0.000001
       return total >= 0.000001;
   });
 
   const renderItem = ({ item }: { item: WalletRow }) => {
-      // Format based on decimals? Or just simple toLocaleString?
-      // Since we don't have exact formatting lib, we use typical JS behavior.
       const total = item.available + item.locked;
 
       return (
@@ -90,7 +86,7 @@ export default function WalletScreen() {
           <Text style={styles.title}>Wallet</Text>
           <View style={styles.toggleContainer}>
               <Text style={styles.toggleLabel}>Hide Small Balances</Text>
-              <Switch value={hideSmall} onValueChange={toggleHideSmall} />
+              <Switch value={hideSmall} onValueChange={toggleHideSmall} trackColor={{ false: '#767577', true: Theme.colors.primary }} />
           </View>
       </View>
 
@@ -98,7 +94,7 @@ export default function WalletScreen() {
           data={filteredBalances}
           keyExtractor={item => item.asset}
           renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchBalances} />}
+          refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchBalances} tintColor={Theme.colors.text} />}
           contentContainerStyle={{ padding: 16 }}
       />
     </View>
@@ -106,7 +102,7 @@ export default function WalletScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingTop: 60 },
+  container: { flex: 1, backgroundColor: Theme.colors.background, paddingTop: 60 },
   header: {
       paddingHorizontal: 16,
       marginBottom: 10,
@@ -114,19 +110,21 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       alignItems: 'center'
   },
-  title: { fontSize: 32, fontWeight: 'bold' },
+  title: { fontSize: 32, fontWeight: 'bold', color: Theme.colors.text },
   toggleContainer: { flexDirection: 'row', alignItems: 'center' },
-  toggleLabel: { marginRight: 8, fontSize: 14, color: '#666' },
+  toggleLabel: { marginRight: 8, fontSize: 14, color: Theme.colors.textSecondary },
 
   card: {
-      backgroundColor: '#f9f9f9',
+      backgroundColor: Theme.colors.surface,
       padding: 16,
       borderRadius: 12,
-      marginBottom: 12
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: Theme.colors.surfaceHighlight
   },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  asset: { fontSize: 18, fontWeight: 'bold' },
-  total: { fontSize: 18, fontWeight: 'bold' },
-  label: { fontSize: 14, color: '#888' },
-  value: { fontSize: 14, color: '#333' }
+  asset: { fontSize: 18, fontWeight: 'bold', color: Theme.colors.text },
+  total: { fontSize: 18, fontWeight: 'bold', color: Theme.colors.text },
+  label: { fontSize: 14, color: Theme.colors.textSecondary },
+  value: { fontSize: 14, color: Theme.colors.text }
 });

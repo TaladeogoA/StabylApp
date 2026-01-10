@@ -1,27 +1,113 @@
 import * as SQLite from 'expo-sqlite';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getDb } from '../db/schema';
 import { streamEngine } from '../engine/stream';
 import { StreamEvent } from '../types';
 
-// Global state
+// --- Global Service State ---
 let globalIsPlaying = false;
 let globalIsReady = false;
 const listeners = new Set<() => void>();
+let loopTimeout: ReturnType<typeof setTimeout> | null = null;
+let isLoopRunning = false;
+
+// --- Service Logic ---
 
 const notifyListeners = () => {
     listeners.forEach(l => l());
 };
+
+const stopLoop = () => {
+    if (loopTimeout) clearTimeout(loopTimeout);
+    isLoopRunning = false;
+};
+
+const startLoop = async () => {
+    if (isLoopRunning) return;
+    if (!globalIsReady) return;
+    if (!globalIsPlaying) return;
+
+    isLoopRunning = true;
+
+    let db: SQLite.SQLiteDatabase;
+    try {
+        db = await getDb();
+    } catch(e) {
+        isLoopRunning = false;
+        return;
+    }
+
+    const tick = async () => {
+        if (!globalIsPlaying) {
+            isLoopRunning = false;
+            return;
+        }
+
+        const events = streamEngine.nextBatch(20);
+
+        if (events.length === 0) {
+            // Should not happen with infinite loop fix, but safe fallback
+            globalIsPlaying = false;
+            isLoopRunning = false;
+            notifyListeners();
+            return;
+        }
+
+        try {
+            await processEvents(db, events);
+            notifyListeners();
+        } catch (e) {
+            console.error(e);
+            globalIsPlaying = false;
+            isLoopRunning = false;
+            notifyListeners();
+            return;
+        }
+
+        loopTimeout = setTimeout(tick, 50);
+    };
+
+    tick();
+};
+
+const togglePlayGlobal = () => {
+    globalIsPlaying = !globalIsPlaying;
+    if (globalIsPlaying) {
+        startLoop();
+    } else {
+        stopLoop();
+    }
+    notifyListeners();
+};
+
+const resetGlobal = () => {
+    stopLoop();
+    globalIsPlaying = false;
+    streamEngine.reset();
+    notifyListeners();
+};
+
+const initGlobal = async () => {
+    if (globalIsReady) return;
+    await streamEngine.load();
+    await getDb();
+    globalIsReady = true;
+    notifyListeners();
+};
+
+// --- React Hook ---
 
 export const useMarketStream = () => {
   const [isPlaying, setIsPlaying] = useState(globalIsPlaying);
   const [isReady, setIsReady] = useState(globalIsReady);
   const [progress, setProgress] = useState(streamEngine.progress);
 
-  const dbRef = useRef<SQLite.SQLiteDatabase | null>(null);
-
-  // Subscribe to global state changes
+  // Subscribe to global state
   useEffect(() => {
+      // Sync immediately on mount
+      setIsPlaying(globalIsPlaying);
+      setIsReady(globalIsReady);
+
       const listener = () => {
           setIsPlaying(globalIsPlaying);
           setIsReady(globalIsReady);
@@ -33,120 +119,21 @@ export const useMarketStream = () => {
       };
   }, []);
 
-  // Initialization (only runs once globally in theory, but safe to run multiple times if protected)
+  // Trigger init once
   useEffect(() => {
-    const init = async () => {
-        if (globalIsReady) return; // Already ready
-        await streamEngine.load();
-        dbRef.current = await getDb();
-        globalIsReady = true;
-        notifyListeners();
-    };
-    init();
+      initGlobal();
   }, []);
-
-  // The Tick Loop - Should only run ONCE globally?
-  // Current design: if useMarketStream is used in multiple places, we might have multiple loops?
-  // Ideally, the loop should be outside the hook or regulated.
-  // We can use a ref to track if *this* hook instance is the "runner", OR just make the loop global too.
-
-  // Actually, simplest fix for now: Move the loop logic to a global "Service" or ensure only one loop runs.
-  // Let's implement a singleton loop manager here.
-
-  // See below for singleton loop implementation.
-  useEffect(() => {
-     if (isReady && isPlaying) {
-         startLoop();
-     } else {
-         stopLoop();
-     }
-  }, [isReady, isPlaying]);
-
-  const togglePlay = () => {
-      globalIsPlaying = !globalIsPlaying;
-      notifyListeners();
-  };
-
-  const reset = () => {
-      stopLoop();
-      globalIsPlaying = false;
-      streamEngine.reset();
-      notifyListeners();
-  };
 
   return {
       isReady,
       isPlaying,
       progress,
-      togglePlay,
-      reset
+      togglePlay: togglePlayGlobal,
+      reset: resetGlobal
   };
 };
 
-// Global Loop Manager
-let loopTimeout: ReturnType<typeof setTimeout> | null = null;
-let isLoopRunning = false;
-
-async function startLoop() {
-    if (isLoopRunning) {
-        return;
-    }
-
-    isLoopRunning = true;
-
-    let db;
-    try {
-        db = await getDb();
-    } catch(e) {
-        // console.error('[Hook] Failed to get DB in loop:', e);
-        isLoopRunning = false;
-        return;
-    }
-
-    if (!globalIsPlaying) {
-        isLoopRunning = false;
-        return;
-    }
-
-    const tick = async () => {
-        // console.log('[Hook] Tick...');
-        if (!globalIsPlaying) {
-            isLoopRunning = false;
-            return;
-        }
-
-        const events = streamEngine.nextBatch(20);
-
-        if (events.length === 0) {
-            globalIsPlaying = false;
-            isLoopRunning = false;
-            notifyListeners();
-            return;
-        }
-
-        try {
-            // console.log(`[Hook] Processing batch of ${events.length}...`);
-            await processEvents(db, events);
-            notifyListeners();
-        } catch (e) {
-            // console.error('[Hook] Error processing events:', e);
-            globalIsPlaying = false;
-            isLoopRunning = false;
-            notifyListeners();
-            return;
-        }
-
-        loopTimeout = setTimeout(tick, 50); // Revert to 50ms for normal speed
-    };
-
-    tick();
-}
-
-function stopLoop() {
-    if (loopTimeout) clearTimeout(loopTimeout);
-    isLoopRunning = false;
-    // We don't change globalIsPlaying here, that's the user's intent.
-}
+// --- DB Helper ---
 
 async function processEvents(db: SQLite.SQLiteDatabase, events: StreamEvent[]) {
     await db.withTransactionAsync(async () => {

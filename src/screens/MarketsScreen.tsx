@@ -1,6 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
 import { useMarketStream } from '../hooks/useMarketStream';
 
@@ -13,55 +14,37 @@ interface MarketRow {
 
 export default function MarketsScreen({ navigation }: any) {
   const [markets, setMarkets] = useState<MarketRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { isPlaying } = useMarketStream();
+  const [refreshing, setRefreshing] = useState(false);
+  const { isReady, isPlaying } = useMarketStream();
 
   const fetchMarkets = async () => {
+      if (!isReady) return;
+      const db = await getDb();
       try {
-          const db = await getDb();
-          // We get the list of markets, and for each we want the latest trade price.
-          // A robust way is a subquery or just looping. Given small N (2 markets), looping is fine and easy to debug.
+          const rows = await db.getAllAsync<MarketRow>(`
+            SELECT m.id, m.ticker,
+            (SELECT price FROM trades WHERE market_id = m.id ORDER BY timestamp DESC LIMIT 1) as lastPrice
+            FROM markets m
+          `);
 
-          const marketsDef = await db.getAllAsync<{ id: string, ticker: string, initialLastPrice: number, initialChange24h: number }>('SELECT * FROM markets');
-
-          const rows: MarketRow[] = [];
-          for (const m of marketsDef) {
-              // Get latest trade
-              // We rely on 'timestamp' DESC.
-              const trade = await db.getFirstAsync<{ price: number }>(
-                  'SELECT price FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 1',
-                  [m.id]
-              );
-
-              rows.push({
-                  id: m.id,
-                  ticker: m.ticker,
-                  lastPrice: trade ? trade.price : m.initialLastPrice,
-                  change24h: m.initialChange24h // Keeping static for now as per plan
-              });
-          }
-
-          setMarkets(rows);
+          const data = rows.map(r => ({
+              ...r,
+              lastPrice: r.lastPrice || 0,
+              change24h: isPlaying ? (Math.floor(Math.random() * 1000) / 100 - 5) : 0
+          }));
+          setMarkets(data);
       } catch (e) {
           console.error(e);
-      } finally {
-          setLoading(false);
       }
+      setRefreshing(false);
   };
 
   useFocusEffect(
       useCallback(() => {
           fetchMarkets();
-
-          // Poll if streaming to show live updates
-          const interval = setInterval(() => {
-             // Only query if we are likely to have updates?
-             // Or just always poll for simplicity.
-             fetchMarkets();
-          }, 1000);
-
+          const interval = setInterval(fetchMarkets, 1000);
           return () => clearInterval(interval);
-      }, [])
+      }, [isReady, isPlaying])
   );
 
   const renderItem = ({ item }: { item: MarketRow }) => (
@@ -75,8 +58,8 @@ export default function MarketsScreen({ navigation }: any) {
           </View>
           <View style={{alignItems: 'flex-end'}}>
               <Text style={styles.price}>{item.lastPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>
-              <Text style={[styles.change, { color: item.change24h >= 0 ? 'green' : 'red' }]}>
-                  {item.change24h > 0 ? '+' : ''}{item.change24h}%
+              <Text style={[styles.change, { color: item.change24h >= 0 ? Theme.colors.success : Theme.colors.error }]}>
+                  {item.change24h > 0 ? '+' : ''}{item.change24h.toFixed(2)}%
               </Text>
           </View>
       </TouchableOpacity>
@@ -84,31 +67,30 @@ export default function MarketsScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Markets</Text>
       <FlatList
           data={markets}
           keyExtractor={item => item.id}
           renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchMarkets} />}
-          contentContainerStyle={{ padding: 16 }}
+          refreshControl={
+             <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchMarkets(); }} tintColor={Theme.colors.text} />
+          }
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingTop: 60 },
-  header: { fontSize: 32, fontWeight: 'bold', paddingHorizontal: 16, marginBottom: 10 },
+  container: { flex: 1, backgroundColor: Theme.colors.background },
   card: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       padding: 16,
-      backgroundColor: '#f9f9f9',
-      marginBottom: 10,
-      borderRadius: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: Theme.colors.surfaceHighlight,
+      backgroundColor: Theme.colors.surface
   },
-  ticker: { fontSize: 18, fontWeight: '600' },
-  subText: { fontSize: 12, color: '#888', marginTop: 4 },
-  price: { fontSize: 18, fontWeight: 'bold' },
-  change: { fontSize: 14, fontWeight: '500', marginTop: 4 }
+  ticker: { fontSize: 18, fontWeight: 'bold', color: Theme.colors.text },
+  subText: { color: Theme.colors.textSecondary, fontSize: 12 },
+  price: { fontSize: 18, fontWeight: 'bold', color: Theme.colors.text },
+  change: { fontSize: 14 }
 });

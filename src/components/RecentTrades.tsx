@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
 
 interface TradeRow {
-  id: string;
   price: number;
   size: number;
-  side: string;
+  side: 'buy' | 'sell';
   timestamp: number;
 }
 
@@ -14,23 +14,25 @@ export default function RecentTrades({ marketId }: { marketId: string }) {
   const [trades, setTrades] = useState<TradeRow[]>([]);
 
   const fetchTrades = async () => {
-      const db = await getDb();
-      const res = await db.getAllAsync<TradeRow>(
-          'SELECT * FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 20',
-          [marketId]
-      );
-      setTrades(res);
+    const db = await getDb();
+    const rows = await db.getAllAsync<TradeRow>(
+        'SELECT price, size, side, timestamp FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 20',
+        [marketId]
+    );
+    setTrades(rows);
   };
 
   useEffect(() => {
-      fetchTrades();
-      const interval = setInterval(fetchTrades, 1000);
-      return () => clearInterval(interval);
+    // Initial fetch
+    fetchTrades();
+    // Poll every 500ms
+    const interval = setInterval(fetchTrades, 500);
+    return () => clearInterval(interval);
   }, [marketId]);
 
   const renderItem = ({ item }: { item: TradeRow }) => (
       <View style={styles.row}>
-          <Text style={[styles.cell, { color: item.side === 'buy' ? 'green' : 'red' }]}>
+          <Text style={[styles.cell, { color: item.side === 'buy' ? Theme.colors.success : Theme.colors.error }]}>
               {item.price.toFixed(2)}
           </Text>
           <Text style={styles.cell}>{item.size.toFixed(4)}</Text>
@@ -42,21 +44,25 @@ export default function RecentTrades({ marketId }: { marketId: string }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Recent Trades</Text>
+      <View style={[styles.row, { borderBottomWidth: 1, borderBottomColor: Theme.colors.border, paddingBottom: 5 }]}>
+          <Text style={styles.headerCell}>Price</Text>
+          <Text style={styles.headerCell}>Size</Text>
+          <Text style={styles.headerCell}>Time</Text>
+      </View>
       <FlatList
-          data={trades}
-          keyExtractor={item => item.id}
-          renderItem={renderItem}
-          scrollEnabled={false} // usually trades is a fixed list in mobile view or inside scrollview
+         data={trades}
+         keyExtractor={(item, index) => `${item.timestamp}-${index}`}
+         renderItem={renderItem}
+         scrollEnabled={false}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { marginTop: 20, padding: 10 },
-  header: { fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
+  container: { flex: 1, padding: 10, backgroundColor: Theme.colors.background },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  cell: { fontSize: 12, fontFamily: 'Courier', width: 80 },
-  cellTime: { fontSize: 12, color: '#888', textAlign: 'right', flex: 1}
+  cell: { fontSize: 12, width: '30%', color: Theme.colors.text },
+  headerCell: { fontSize: 12, fontWeight: 'bold', width: '30%', color: Theme.colors.textSecondary },
+  cellTime: { fontSize: 11, color: Theme.colors.textSecondary, width: '30%', textAlign: 'right' }
 });

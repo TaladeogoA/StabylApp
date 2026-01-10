@@ -44,13 +44,16 @@ export class MarketStream {
     }
 
     nextBatch(batchSize: number = 10): StreamEvent[] {
+        if (this.events.length === 0) return [];
+
         if (this.currentIndex >= this.events.length) {
-            return [];
+            this.currentIndex = 0;
         }
 
         const end = Math.min(this.currentIndex + batchSize, this.events.length);
         const batch = this.events.slice(this.currentIndex, end);
         this.currentIndex = end;
+
         return batch;
     }
 

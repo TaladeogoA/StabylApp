@@ -1,115 +1,137 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
 import { useMarketStream } from '../hooks/useMarketStream';
 
 interface OrderBookRow {
   price: number;
   size: number;
-  total?: number;
 }
 
 export default function OrderBook({ marketId }: { marketId: string }) {
   const [bids, setBids] = useState<OrderBookRow[]>([]);
   const [asks, setAsks] = useState<OrderBookRow[]>([]);
+  // We need maxSize to normalize the bars
+  const [maxSize, setMaxSize] = useState(1);
   const { isPlaying } = useMarketStream();
 
   const fetchOrderBook = async () => {
       const db = await getDb();
 
-      // Top 15 Asks (Lowest first)
       const asksData = await db.getAllAsync<OrderBookRow>(
           'SELECT price, size FROM order_book WHERE market_id = ? AND side = ? ORDER BY price ASC LIMIT 15',
           [marketId, 'ask']
       );
 
-      // Top 15 Bids (Highest first)
       const bidsData = await db.getAllAsync<OrderBookRow>(
           'SELECT price, size FROM order_book WHERE market_id = ? AND side = ? ORDER BY price DESC LIMIT 15',
           [marketId, 'bid']
       );
 
-      setAsks(asksData.reverse()); // Show highest ask at top of its list (closest to spread)? Or standard list.
-      // Standard OB: Asks stack up from spread. Bids stack down from spread.
-      // Let's keep Asks as ASC (lowest price - best ask - at bottom of ask list? or top?).
-      // Convention:
-      // Asks: High Price
-      //       ...
-      //       Low Price (Best Ask)
-      // ----------------------
-      //       High Price (Best Bid)
-      //       ...
-      // Bids: Low Price
+      // Find global max size in this view to scale bars
+      let max = 0;
+      [...asksData, ...bidsData].forEach(r => max = Math.max(max, r.size));
+      if (max === 0) max = 1;
 
-      // So fetch gives us Lowest Asks. If we render top-down, we want Highest Asks first. So reverse ASC result.
-      setAsks(asksData.reverse());
-      setBids(bidsData);
+      setMaxSize(max);
+      setAsks(asksData); // Asks: Low to High (standard list)
+      setBids(bidsData); // Bids: High to Low
   };
 
   useEffect(() => {
       fetchOrderBook();
-      const interval = setInterval(fetchOrderBook, 500); // 2Hz refresh for smoothness
+      const interval = setInterval(fetchOrderBook, 500);
       return () => clearInterval(interval);
   }, [marketId]);
 
-  const renderRow = (item: OrderBookRow, type: 'bid' | 'ask') => (
-      <View style={styles.row}>
-          <Text style={[styles.cell, { color: type === 'bid' ? 'green' : 'red' }]}>
-              {item.price.toFixed(2)}
-          </Text>
-          <Text style={styles.cell}>{item.size.toFixed(4)}</Text>
-      </View>
-  );
+  const renderSide = (data: OrderBookRow[], type: 'bid' | 'ask') => {
+      return (
+          <View style={styles.column}>
+              <View style={styles.headerRow}>
+                  <Text style={styles.headerText}>{type === 'bid' ? 'Bid' : 'Ask'}</Text>
+                  <Text style={styles.headerText}>Size</Text>
+              </View>
+              {data.map((item, i) => {
+                  const barWidth = (item.size / maxSize) * 100;
+                  const color = type === 'bid' ? Theme.colors.success : Theme.colors.error;
+                  const bg = type === 'bid' ? Theme.colors.depthBuy : Theme.colors.depthSell;
+
+                  return (
+                      <View key={i} style={styles.row}>
+                          {/* Depth Bar Background */}
+                          <View
+                             style={[
+                                 styles.bar,
+                                 {
+                                     backgroundColor: bg,
+                                     width: `${barWidth}%`,
+                                     right: type === 'bid' ? 0 : undefined,
+                                     left: type === 'ask' ? 0 : undefined
+                                 }
+                             ]}
+                          />
+
+                          {/* Price */}
+                          <Text style={[styles.cell, { color, textAlign: type === 'bid' ? 'right' : 'left' }]}>
+                              {item.price.toFixed(2)}
+                          </Text>
+
+                          {/* Size */}
+                          <Text style={[styles.cell, { color: Theme.colors.textSecondary, textAlign: 'right' }]}>
+                              {item.size.toFixed(4)}
+                          </Text>
+                      </View>
+                  );
+              })}
+          </View>
+      );
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Order Book</Text>
+      {/* 2 Column Layout */}
+      <View style={styles.wrapper}>
+          {/* Left: Bids */}
+          {renderSide(bids, 'bid')}
 
-      {/* Asks */}
-      <View style={styles.section}>
-          {asks.map((item, i) => <View key={`ask-${i}`}>{renderRow(item, 'ask')}</View>)}
-      </View>
+          {/* Divider */}
+          <View style={{width: 1, backgroundColor: Theme.colors.border}} />
 
-      <View style={styles.spread}>
-         <Text style={styles.spreadText}>--- Spread ---</Text>
-      </View>
-
-      {/* Bids */}
-      <View style={styles.section}>
-          {bids.map((item, i) => <View key={`bid-${i}`}>{renderRow(item, 'bid')}</View>)}
+          {/* Right: Asks */}
+          {renderSide(asks, 'ask')}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10
+  container: { flex: 1, backgroundColor: Theme.colors.background },
+  wrapper: { flexDirection: 'row', flex: 1 },
+  column: { flex: 1 },
+  headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingHorizontal: 8,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: Theme.colors.border
   },
-  header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5
-  },
-  section: {
-    minHeight: 100
-  },
+  headerText: { color: Theme.colors.textSecondary, fontSize: 12 },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 2
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      position: 'relative',
+      height: 24,
+      alignItems: 'center'
   },
-  cell: {
-    fontSize: 12,
-    fontFamily: 'Courier'
-  },
-  spread: {
-    alignItems: 'center',
-    marginVertical: 5
-  },
-  spreadText: {
-    color: '#888',
-    fontSize: 10
+  cell: { fontSize: 11, fontWeight: '600', zIndex: 2 },
+  bar: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      zIndex: 1
   }
 });
