@@ -28,8 +28,8 @@ const orderBooksSeed: OrderBookData[] = [
 ];
 
 const tradesSeed: TradeData[] = [
-  ...tradesUsdtNgnRaw as TradeData[],
-  ...tradesUsdcNgnRaw as TradeData[],
+  ...tradesUsdtNgnRaw,
+  ...tradesUsdcNgnRaw,
 ];
 
 
