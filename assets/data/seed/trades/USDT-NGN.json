@@ -1,0 +1,802 @@
+[
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_0",
+    "price": 997.04,
+    "size": 61.2877,
+    "side": "buy",
+    "ts": 1767980937584
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_1",
+    "price": 997.67,
+    "size": 76.979,
+    "side": "buy",
+    "ts": 1767980937585
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_2",
+    "price": 996.34,
+    "size": 330.5376,
+    "side": "sell",
+    "ts": 1767980937586
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_3",
+    "price": 997.2,
+    "size": 286.5519,
+    "side": "sell",
+    "ts": 1767980937587
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_4",
+    "price": 996.02,
+    "size": 375.6189,
+    "side": "buy",
+    "ts": 1767980937588
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_5",
+    "price": 996.63,
+    "size": 474.3426,
+    "side": "buy",
+    "ts": 1767980937589
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_6",
+    "price": 997.15,
+    "size": 264.9323,
+    "side": "sell",
+    "ts": 1767980937590
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_7",
+    "price": 996.06,
+    "size": 449.1707,
+    "side": "sell",
+    "ts": 1767980937591
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_8",
+    "price": 996.41,
+    "size": 191.6479,
+    "side": "buy",
+    "ts": 1767980937592
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_9",
+    "price": 996.06,
+    "size": 32.735,
+    "side": "sell",
+    "ts": 1767980937593
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_10",
+    "price": 997.03,
+    "size": 417.9784,
+    "side": "sell",
+    "ts": 1767980937594
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_11",
+    "price": 997.42,
+    "size": 40.1885,
+    "side": "buy",
+    "ts": 1767980937595
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_12",
+    "price": 996.41,
+    "size": 231.6007,
+    "side": "sell",
+    "ts": 1767980937596
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_13",
+    "price": 997.73,
+    "size": 144.0658,
+    "side": "sell",
+    "ts": 1767980937597
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_14",
+    "price": 996.23,
+    "size": 164.694,
+    "side": "sell",
+    "ts": 1767980937598
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_15",
+    "price": 997.92,
+    "size": 27.7159,
+    "side": "sell",
+    "ts": 1767980937599
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_16",
+    "price": 997.42,
+    "size": 64.8124,
+    "side": "sell",
+    "ts": 1767980937600
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_17",
+    "price": 996.46,
+    "size": 102.0415,
+    "side": "sell",
+    "ts": 1767980937601
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_18",
+    "price": 997.27,
+    "size": 188.874,
+    "side": "buy",
+    "ts": 1767980937602
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_19",
+    "price": 996.33,
+    "size": 181.5573,
+    "side": "buy",
+    "ts": 1767980937603
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_20",
+    "price": 997.48,
+    "size": 358.6812,
+    "side": "buy",
+    "ts": 1767980937604
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_21",
+    "price": 996.58,
+    "size": 13.3213,
+    "side": "sell",
+    "ts": 1767980937605
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_22",
+    "price": 997.87,
+    "size": 186.227,
+    "side": "buy",
+    "ts": 1767980937606
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_23",
+    "price": 997.19,
+    "size": 49.181,
+    "side": "sell",
+    "ts": 1767980937607
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_24",
+    "price": 996.12,
+    "size": 25.3486,
+    "side": "sell",
+    "ts": 1767980937608
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_25",
+    "price": 996.65,
+    "size": 212.8964,
+    "side": "buy",
+    "ts": 1767980937609
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_26",
+    "price": 996.23,
+    "size": 229.448,
+    "side": "buy",
+    "ts": 1767980937610
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_27",
+    "price": 996.51,
+    "size": 247.0718,
+    "side": "buy",
+    "ts": 1767980937611
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_28",
+    "price": 997.67,
+    "size": 124.3155,
+    "side": "buy",
+    "ts": 1767980937612
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_29",
+    "price": 996.54,
+    "size": 355.5218,
+    "side": "buy",
+    "ts": 1767980937613
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_30",
+    "price": 997.24,
+    "size": 47.8541,
+    "side": "sell",
+    "ts": 1767980937614
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_31",
+    "price": 996.88,
+    "size": 39.6267,
+    "side": "sell",
+    "ts": 1767980937615
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_32",
+    "price": 996.07,
+    "size": 234.5635,
+    "side": "sell",
+    "ts": 1767980937616
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_33",
+    "price": 996.6,
+    "size": 123.3758,
+    "side": "sell",
+    "ts": 1767980937617
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_34",
+    "price": 996.4,
+    "size": 209.2348,
+    "side": "buy",
+    "ts": 1767980937618
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_35",
+    "price": 996.26,
+    "size": 65.3903,
+    "side": "buy",
+    "ts": 1767980937619
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_36",
+    "price": 998.0,
+    "size": 196.386,
+    "side": "buy",
+    "ts": 1767980937620
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_37",
+    "price": 997.58,
+    "size": 194.6914,
+    "side": "buy",
+    "ts": 1767980937621
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_38",
+    "price": 997.1,
+    "size": 45.5803,
+    "side": "sell",
+    "ts": 1767980937622
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_39",
+    "price": 996.48,
+    "size": 91.7732,
+    "side": "sell",
+    "ts": 1767980937623
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_40",
+    "price": 997.41,
+    "size": 52.0593,
+    "side": "buy",
+    "ts": 1767980937624
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_41",
+    "price": 997.93,
+    "size": 433.8215,
+    "side": "buy",
+    "ts": 1767980937625
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_42",
+    "price": 996.72,
+    "size": 311.347,
+    "side": "sell",
+    "ts": 1767980937626
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_43",
+    "price": 996.6,
+    "size": 495.0432,
+    "side": "sell",
+    "ts": 1767980937627
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_44",
+    "price": 996.68,
+    "size": 79.5295,
+    "side": "buy",
+    "ts": 1767980937628
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_45",
+    "price": 997.83,
+    "size": 3.3057,
+    "side": "sell",
+    "ts": 1767980937629
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_46",
+    "price": 996.37,
+    "size": 282.8881,
+    "side": "sell",
+    "ts": 1767980937630
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_47",
+    "price": 996.18,
+    "size": 450.5172,
+    "side": "buy",
+    "ts": 1767980937631
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_48",
+    "price": 996.57,
+    "size": 100.7664,
+    "side": "buy",
+    "ts": 1767980937632
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_49",
+    "price": 996.41,
+    "size": 217.5127,
+    "side": "sell",
+    "ts": 1767980937633
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_50",
+    "price": 996.17,
+    "size": 477.5113,
+    "side": "sell",
+    "ts": 1767980937634
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_51",
+    "price": 997.36,
+    "size": 390.0406,
+    "side": "sell",
+    "ts": 1767980937635
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_52",
+    "price": 997.77,
+    "size": 315.3429,
+    "side": "sell",
+    "ts": 1767980937636
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_53",
+    "price": 996.17,
+    "size": 495.5395,
+    "side": "buy",
+    "ts": 1767980937637
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_54",
+    "price": 996.16,
+    "size": 279.0314,
+    "side": "sell",
+    "ts": 1767980937638
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_55",
+    "price": 997.15,
+    "size": 271.4105,
+    "side": "sell",
+    "ts": 1767980937639
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_56",
+    "price": 997.47,
+    "size": 465.6272,
+    "side": "sell",
+    "ts": 1767980937640
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_57",
+    "price": 997.23,
+    "size": 364.4835,
+    "side": "sell",
+    "ts": 1767980937641
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_58",
+    "price": 997.31,
+    "size": 216.6773,
+    "side": "sell",
+    "ts": 1767980937642
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_59",
+    "price": 998.01,
+    "size": 104.8688,
+    "side": "buy",
+    "ts": 1767980937643
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_60",
+    "price": 996.95,
+    "size": 385.0832,
+    "side": "buy",
+    "ts": 1767980937644
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_61",
+    "price": 997.06,
+    "size": 371.9129,
+    "side": "buy",
+    "ts": 1767980937645
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_62",
+    "price": 997.46,
+    "size": 143.2389,
+    "side": "buy",
+    "ts": 1767980937646
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_63",
+    "price": 997.15,
+    "size": 251.6248,
+    "side": "buy",
+    "ts": 1767980937647
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_64",
+    "price": 997.35,
+    "size": 410.3421,
+    "side": "sell",
+    "ts": 1767980937648
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_65",
+    "price": 996.93,
+    "size": 224.3723,
+    "side": "sell",
+    "ts": 1767980937649
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_66",
+    "price": 996.28,
+    "size": 497.9988,
+    "side": "buy",
+    "ts": 1767980937650
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_67",
+    "price": 997.54,
+    "size": 198.1927,
+    "side": "sell",
+    "ts": 1767980937651
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_68",
+    "price": 997.63,
+    "size": 254.6429,
+    "side": "sell",
+    "ts": 1767980937652
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_69",
+    "price": 996.74,
+    "size": 191.7939,
+    "side": "sell",
+    "ts": 1767980937653
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_70",
+    "price": 997.35,
+    "size": 231.1397,
+    "side": "sell",
+    "ts": 1767980937654
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_71",
+    "price": 997.48,
+    "size": 431.415,
+    "side": "sell",
+    "ts": 1767980937655
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_72",
+    "price": 997.75,
+    "size": 270.7647,
+    "side": "sell",
+    "ts": 1767980937656
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_73",
+    "price": 996.93,
+    "size": 432.296,
+    "side": "buy",
+    "ts": 1767980937657
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_74",
+    "price": 996.65,
+    "size": 428.5064,
+    "side": "sell",
+    "ts": 1767980937658
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_75",
+    "price": 996.65,
+    "size": 371.1342,
+    "side": "sell",
+    "ts": 1767980937659
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_76",
+    "price": 997.68,
+    "size": 224.0202,
+    "side": "sell",
+    "ts": 1767980937660
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_77",
+    "price": 997.48,
+    "size": 25.767,
+    "side": "buy",
+    "ts": 1767980937661
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_78",
+    "price": 996.86,
+    "size": 241.2233,
+    "side": "buy",
+    "ts": 1767980937662
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_79",
+    "price": 996.6,
+    "size": 230.0433,
+    "side": "sell",
+    "ts": 1767980937663
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_80",
+    "price": 997.07,
+    "size": 170.7609,
+    "side": "buy",
+    "ts": 1767980937664
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_81",
+    "price": 997.69,
+    "size": 87.3471,
+    "side": "buy",
+    "ts": 1767980937665
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_82",
+    "price": 997.2,
+    "size": 83.866,
+    "side": "sell",
+    "ts": 1767980937666
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_83",
+    "price": 997.04,
+    "size": 114.0879,
+    "side": "buy",
+    "ts": 1767980937667
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_84",
+    "price": 996.91,
+    "size": 174.5863,
+    "side": "sell",
+    "ts": 1767980937668
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_85",
+    "price": 997.25,
+    "size": 78.0264,
+    "side": "buy",
+    "ts": 1767980937669
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_86",
+    "price": 996.14,
+    "size": 119.4893,
+    "side": "sell",
+    "ts": 1767980937670
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_87",
+    "price": 996.25,
+    "size": 188.6582,
+    "side": "sell",
+    "ts": 1767980937671
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_88",
+    "price": 997.45,
+    "size": 450.2864,
+    "side": "sell",
+    "ts": 1767980937672
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_89",
+    "price": 996.59,
+    "size": 17.7684,
+    "side": "sell",
+    "ts": 1767980937673
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_90",
+    "price": 996.68,
+    "size": 53.4971,
+    "side": "sell",
+    "ts": 1767980937674
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_91",
+    "price": 996.81,
+    "size": 306.2679,
+    "side": "buy",
+    "ts": 1767980937675
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_92",
+    "price": 997.8,
+    "size": 469.9484,
+    "side": "buy",
+    "ts": 1767980937676
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_93",
+    "price": 997.33,
+    "size": 370.6846,
+    "side": "buy",
+    "ts": 1767980937677
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_94",
+    "price": 996.43,
+    "size": 259.237,
+    "side": "sell",
+    "ts": 1767980937678
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_95",
+    "price": 997.58,
+    "size": 163.9507,
+    "side": "sell",
+    "ts": 1767980937679
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_96",
+    "price": 997.08,
+    "size": 470.6883,
+    "side": "sell",
+    "ts": 1767980937680
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_97",
+    "price": 997.3,
+    "size": 160.4612,
+    "side": "sell",
+    "ts": 1767980937681
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_98",
+    "price": 996.7,
+    "size": 277.0967,
+    "side": "sell",
+    "ts": 1767980937682
+  },
+  {
+    "market": "USDT-NGN",
+    "tradeId": "usdtngn_99",
+    "price": 997.69,
+    "size": 259.1033,
+    "side": "sell",
+    "ts": 1767980937683
+  }
+]

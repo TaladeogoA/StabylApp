@@ -1,0 +1,20 @@
+[
+  {
+    "marketId": "USDT-NGN",
+    "base": "USDT",
+    "quote": "NGN",
+    "tickSize": 0.01,
+    "minOrderSize": 0.0001,
+    "initialLastPrice": 997.02,
+    "initialChange24h": 0.15
+  },
+  {
+    "marketId": "USDC-NGN",
+    "base": "USDC",
+    "quote": "NGN",
+    "tickSize": 0.01,
+    "minOrderSize": 0.0001,
+    "initialLastPrice": 1228.68,
+    "initialChange24h": -4.65
+  }
+]

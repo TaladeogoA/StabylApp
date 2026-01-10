@@ -1,0 +1,17 @@
+[
+  {
+    "assetId": "NGN",
+    "decimals": 2,
+    "description": "NGN token"
+  },
+  {
+    "assetId": "USDC",
+    "decimals": 6,
+    "description": "USDC token"
+  },
+  {
+    "assetId": "USDT",
+    "decimals": 6,
+    "description": "USDT token"
+  }
+]

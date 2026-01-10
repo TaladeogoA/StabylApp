@@ -1,0 +1,17 @@
+[
+  {
+    "asset": "NGN",
+    "available": 2049.0,
+    "locked": 56.88
+  },
+  {
+    "asset": "USDC",
+    "available": 990.183549,
+    "locked": 17.612009
+  },
+  {
+    "asset": "USDT",
+    "available": 6824.846,
+    "locked": 38.416077
+  }
+]
