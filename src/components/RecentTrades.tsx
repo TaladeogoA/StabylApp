@@ -1,13 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
 
 interface TradeRow {
+  id: string;
   price: number;
   size: number;
   side: 'buy' | 'sell';
   timestamp: number;
+}
+
+const AnimatedTradeRow = ({ item }: { item: TradeRow }) => {
+    return (
+        <Animated.View
+            entering={FadeIn.duration(400)}
+            layout={LinearTransition.springify()}
+            style={styles.row}
+        >
+            <Text style={[styles.cell, { color: item.side === 'buy' ? Theme.colors.success : Theme.colors.error }]}>
+                {item.price.toFixed(2)}
+            </Text>
+            <Text style={styles.cell}>{item.size.toFixed(4)}</Text>
+            <Text style={styles.cellTime}>
+                {new Date(item.timestamp).toLocaleTimeString([], { hour12: false })}
+            </Text>
+        </Animated.View>
+    );
 }
 
 export default function RecentTrades({ marketId }: { marketId: string }) {
@@ -16,53 +36,77 @@ export default function RecentTrades({ marketId }: { marketId: string }) {
   const fetchTrades = async () => {
     const db = await getDb();
     const rows = await db.getAllAsync<TradeRow>(
-        'SELECT price, size, side, timestamp FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 20',
+        'SELECT id, price, size, side, timestamp FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 20',
         [marketId]
     );
     setTrades(rows);
   };
 
   useEffect(() => {
-    // Initial fetch
     fetchTrades();
-    // Poll every 500ms
     const interval = setInterval(fetchTrades, 500);
     return () => clearInterval(interval);
   }, [marketId]);
 
-  const renderItem = ({ item }: { item: TradeRow }) => (
-      <View style={styles.row}>
-          <Text style={[styles.cell, { color: item.side === 'buy' ? Theme.colors.success : Theme.colors.error }]}>
-              {item.price.toFixed(2)}
-          </Text>
-          <Text style={styles.cell}>{item.size.toFixed(4)}</Text>
-          <Text style={styles.cellTime}>
-             {new Date(item.timestamp).toLocaleTimeString()}
-          </Text>
-      </View>
-  );
-
   return (
     <View style={styles.container}>
-      <View style={[styles.row, { borderBottomWidth: 1, borderBottomColor: Theme.colors.border, paddingBottom: 5 }]}>
+      <View style={[styles.headerRow]}>
           <Text style={styles.headerCell}>Price</Text>
           <Text style={styles.headerCell}>Size</Text>
-          <Text style={styles.headerCell}>Time</Text>
+          <Text style={styles.headerCellTime}>Time</Text>
       </View>
-      <FlatList
-         data={trades}
-         keyExtractor={(item, index) => `${item.timestamp}-${index}`}
-         renderItem={renderItem}
-         scrollEnabled={false}
-      />
+      <View>
+          {trades.map((item) => (
+             <AnimatedTradeRow key={item.id} item={item} />
+          ))}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: Theme.colors.background },
-  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  cell: { fontSize: 12, width: '30%', color: Theme.colors.text },
-  headerCell: { fontSize: 12, fontWeight: 'bold', width: '30%', color: Theme.colors.textSecondary },
-  cellTime: { fontSize: 11, color: Theme.colors.textSecondary, width: '30%', textAlign: 'right' }
+  container: { flex: 1, padding: 16, backgroundColor: Theme.colors.background },
+  headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: Theme.colors.border,
+      paddingBottom: 8
+  },
+  row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 6,
+      alignItems: 'center'
+  },
+  cell: {
+      fontSize: 13,
+      fontWeight: '600',
+      width: '30%',
+      color: Theme.colors.text,
+      fontVariant: ['tabular-nums']
+  },
+  headerCell: {
+      fontSize: 11,
+      fontWeight: 'bold',
+      width: '30%',
+      color: Theme.colors.textSecondary,
+      textTransform: 'uppercase'
+  },
+  cellTime: {
+      fontSize: 12,
+      color: Theme.colors.textSecondary,
+      width: '30%',
+      textAlign: 'right',
+      fontVariant: ['tabular-nums']
+  },
+  headerCellTime: {
+      fontSize: 11,
+      fontWeight: 'bold',
+      width: '30%',
+      color: Theme.colors.textSecondary,
+      textAlign: 'right',
+      textTransform: 'uppercase'
+  }
 });

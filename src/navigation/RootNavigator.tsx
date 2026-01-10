@@ -1,8 +1,11 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { BlurView } from 'expo-blur';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 
+import GlassTabBar from '../components/GlassTabBar';
 import { Theme } from '../constants/Theme';
 import MarketDetailScreen from '../screens/MarketDetailScreen';
 import MarketsScreen from '../screens/MarketsScreen';
@@ -21,18 +24,27 @@ const MyDarkTheme = {
     card: Theme.colors.surface,
     text: Theme.colors.text,
     border: Theme.colors.border,
+    notification: Theme.colors.accent,
   },
 };
 
 function MainTabs() {
   return (
     <Tab.Navigator
+       tabBar={(props) => <GlassTabBar {...props} />}
        screenOptions={{
-           headerStyle: { backgroundColor: Theme.colors.surface },
+           headerTransparent: true,
+           headerStyle: {
+               backgroundColor: 'transparent',
+           },
+           headerBackground: () => (
+               <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+           ),
            headerTintColor: Theme.colors.text,
-           tabBarStyle: { backgroundColor: Theme.colors.surface, borderTopColor: Theme.colors.border },
-           tabBarActiveTintColor: Theme.colors.primary,
-           tabBarInactiveTintColor: Theme.colors.textSecondary,
+           headerTitleStyle: {
+               fontWeight: Theme.typography.brand.fontWeight as any,
+               letterSpacing: Theme.typography.brand.letterSpacing
+           },
        }}
     >
       <Tab.Screen name="Markets" component={MarketsScreen} />
@@ -46,8 +58,14 @@ export default function RootNavigator() {
   return (
     <NavigationContainer theme={MyDarkTheme}>
       <Stack.Navigator screenOptions={{
-          headerStyle: { backgroundColor: Theme.colors.surface },
-          headerTintColor: Theme.colors.text,
+           headerTransparent: true,
+           headerStyle: {
+               backgroundColor: 'transparent',
+           },
+           headerBackground: () => (
+               <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+           ),
+           headerTintColor: Theme.colors.text,
       }}>
         <Stack.Screen
           name="Root"

@@ -1,6 +1,24 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { BlurView } from 'expo-blur';
 import React, { useCallback, useState } from 'react';
-import { Alert, Button, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import Animated, {
+    FadeInDown,
+    FadeOutRight,
+    Layout
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TabSwitcher from '../components/TabSwitcher';
 import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
@@ -19,9 +37,11 @@ export default function OrdersScreen() {
   const [marketId, setMarketId] = useState('USDT-NGN');
   const [price, setPrice] = useState('');
   const [amount, setAmount] = useState('');
+  const [side, setSide] = useState<'buy' | 'sell'>('buy');
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('Open Orders');
+  const insets = useSafeAreaInsets();
 
   const fetchOrders = async () => {
       const db = await getDb();
@@ -35,7 +55,7 @@ export default function OrdersScreen() {
       }, [])
   );
 
-  const handlePlaceOrder = async (side: 'buy' | 'sell') => {
+  const handlePlaceOrder = async () => {
       const p = parseFloat(price);
       const a = parseFloat(amount);
       if (isNaN(p) || isNaN(a) || p <= 0 || a <= 0) {
@@ -68,11 +88,6 @@ export default function OrdersScreen() {
                   [requiredAmount, requiredAmount, requiredAsset]
               );
 
-              // Use Date.now() for unique integer ID for SQLite autoincrement compatibility if needed,
-              // but schema uses AUTOINCREMENT. Let's let SQLite handle ID if possible?
-              // Actually schema is: `id INTEGER PRIMARY KEY AUTOINCREMENT`.
-              // We should NOT pass ID manually OR cast it if we do.
-              // Passing manual timestamp as ID on insert
               await db.runAsync(
                   'INSERT INTO orders (market_id, side, price, amount, status, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
                   [marketId, side, p, a, 'open', Date.now()]
@@ -81,7 +96,7 @@ export default function OrdersScreen() {
 
           setPrice('');
           setAmount('');
-          Alert.alert('Success', 'Order successfully placed locally');
+          Alert.alert('Success', 'Order successfully placed');
           fetchOrders();
       } catch (e: any) {
           Alert.alert('Order Failed', e.message);
@@ -106,10 +121,9 @@ export default function OrdersScreen() {
                   [lockedAmount, lockedAmount, lockedAsset]
               );
 
-              // Soft Delete: Update status to 'cancelled'
               await db.runAsync('UPDATE orders SET status = "cancelled" WHERE id = ?', [order.id]);
           });
-          Alert.alert('Success', 'Order cancelled');
+          // Alert.alert('Success', 'Order cancelled'); // Removed for smoother flow
           fetchOrders();
       } catch (e: any) {
           Alert.alert('Error', e.message);
@@ -120,100 +134,253 @@ export default function OrdersScreen() {
       activeTab === 'Open Orders' ? o.status === 'open' : o.status !== 'open'
   );
 
-  const renderItem = ({ item }: { item: OrderRow }) => (
-      <View style={styles.card}>
-          <View>
-              <Text style={{fontWeight: 'bold', color: Theme.colors.text}}>{item.market_id} <Text style={{color: item.side === 'buy' ? Theme.colors.success : Theme.colors.error}}>{item.side.toUpperCase()}</Text></Text>
-              <Text style={{color: Theme.colors.textSecondary}}>{item.amount} @ {item.price}</Text>
-              {item.status !== 'open' && <Text style={{fontSize: 10, color: Theme.colors.textSecondary}}>Status: {item.status}</Text>}
+  const renderItem = ({ item, index }: { item: OrderRow, index: number }) => (
+      <Animated.View
+        entering={FadeInDown.delay(index * 50)}
+        exiting={FadeOutRight}
+        layout={Layout.springify()}
+        style={styles.card}
+      >
+          <View style={styles.cardRow}>
+              <View style={[styles.badge, { backgroundColor: item.side === 'buy' ? 'rgba(39, 196, 133, 0.2)' : 'rgba(255, 59, 48, 0.2)' }]}>
+                  <Text style={[styles.badgeText, { color: item.side === 'buy' ? Theme.colors.buy : Theme.colors.sell }]}>
+                      {item.side.toUpperCase()}
+                  </Text>
+              </View>
+              <Text style={styles.marketText}>{item.market_id}</Text>
           </View>
+
+          <View style={styles.detailsRow}>
+              <View>
+                  <Text style={styles.label}>Price</Text>
+                  <Text style={styles.value}>{item.price}</Text>
+              </View>
+              <View>
+                  <Text style={styles.label}>Amount</Text>
+                  <Text style={styles.value}>{item.amount}</Text>
+              </View>
+              <View>
+                   <Text style={[styles.statusText, { color: item.status === 'open' ? Theme.colors.accent : Theme.colors.textSecondary }]}>
+                       {item.status.toUpperCase()}
+                   </Text>
+              </View>
+          </View>
+
           {item.status === 'open' && (
-              <Button title="Cancel" onPress={() => cancelOrder(item)} color={Theme.colors.error} />
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => cancelOrder(item)}>
+                  <Ionicons name="close-circle-outline" size={24} color={Theme.colors.textSecondary} />
+              </TouchableOpacity>
           )}
-      </View>
+      </Animated.View>
   );
 
   return (
-    <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-    >
-        <ScrollView contentContainerStyle={styles.scroll}>
-            <Text style={styles.header}>Place Order ({marketId})</Text>
+    <View style={styles.container}>
+        <View style={styles.backgroundContainer} />
 
-            <View style={styles.form}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Price"
-                    placeholderTextColor={Theme.colors.textSecondary}
-                    keyboardType="numeric"
-                    value={price}
-                    onChangeText={setPrice}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Amount"
-                    placeholderTextColor={Theme.colors.textSecondary}
-                    keyboardType="numeric"
-                    value={amount}
-                    onChangeText={setAmount}
-                />
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
+        >
+            <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 20, paddingBottom: 100 }]}>
 
-                <View style={styles.row}>
-                    <View style={{flex: 1, marginRight: 5}}>
-                         <Button title="Buy" onPress={() => handlePlaceOrder('buy')} color={Theme.colors.success} disabled={loading} />
+                {/* Glass Order Ticket */}
+                <BlurView intensity={30} tint="dark" style={styles.ticket}>
+                    <View style={styles.ticketHeader}>
+                        <Text style={styles.ticketTitle}>Limit Order</Text>
+                        <Text style={styles.ticketMarket}>{marketId}</Text>
                     </View>
-                    <View style={{flex: 1, marginLeft: 5}}>
-                         <Button title="Sell" onPress={() => handlePlaceOrder('sell')} color={Theme.colors.error} disabled={loading} />
+
+                    {/* Segmented Control */}
+                    <View style={styles.segmentContainer}>
+                        <TouchableOpacity
+                            style={[styles.segmentBtn, side === 'buy' && styles.segmentBtnActiveBuy]}
+                            onPress={() => setSide('buy')}
+                        >
+                            <Text style={[styles.segmentText, side === 'buy' && styles.segmentTextActive]}>Buy</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.segmentBtn, side === 'sell' && styles.segmentBtnActiveSell]}
+                            onPress={() => setSide('sell')}
+                        >
+                            <Text style={[styles.segmentText, side === 'sell' && styles.segmentTextActive]}>Sell</Text>
+                        </TouchableOpacity>
                     </View>
-                </View>
-            </View>
 
-            <View style={{marginTop: 20}}>
-                <TabSwitcher
-                    tabs={['Open Orders', 'History']}
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                />
-            </View>
+                    {/* Inputs */}
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.inputLabel}>Price (USDT)</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="0.00"
+                            placeholderTextColor={Theme.colors.textSecondary}
+                            keyboardType="numeric"
+                            value={price}
+                            onChangeText={setPrice}
+                        />
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.inputLabel}>Amount ({marketId.split('-')[0]})</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="0.00"
+                            placeholderTextColor={Theme.colors.textSecondary}
+                            keyboardType="numeric"
+                            value={amount}
+                            onChangeText={setAmount}
+                        />
+                    </View>
 
-            {filteredOrders.length === 0 && <Text style={{textAlign: 'center', color: Theme.colors.textSecondary, marginTop: 20}}>No {activeTab.toLowerCase()}</Text>}
-            {filteredOrders.map(item => (
-                <View key={item.id} style={{marginBottom: 10}}>
-                   {renderItem({item})}
+                    {/* Action Button */}
+                    <TouchableOpacity
+                        style={[
+                            styles.actionBtn,
+                            { backgroundColor: side === 'buy' ? Theme.colors.buy : Theme.colors.sell, opacity: loading ? 0.7 : 1 }
+                        ]}
+                        onPress={handlePlaceOrder}
+                        disabled={loading}
+                    >
+                        <Text style={styles.actionBtnText}>
+                            {side === 'buy' ? `Buy ${marketId.split('-')[0]}` : `Sell ${marketId.split('-')[0]}`}
+                        </Text>
+                    </TouchableOpacity>
+
+                </BlurView>
+
+                {/* Orders List */}
+                <View style={{marginTop: 32}}>
+                    <TabSwitcher
+                        tabs={['Open Orders', 'History']}
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                    />
                 </View>
-            ))}
-        </ScrollView>
-    </KeyboardAvoidingView>
+
+                <View style={styles.listContainer}>
+                    {filteredOrders.length === 0 && (
+                        <View style={styles.emptyState}>
+                            <Ionicons name="list-outline" size={48} color={Theme.colors.surfaceHighlight} />
+                            <Text style={styles.emptyText}>No {activeTab.toLowerCase()}</Text>
+                        </View>
+                    )}
+                    {filteredOrders.map((item, index) => (
+                        <View key={item.id} style={{marginBottom: 12}}>
+                            {renderItem({item, index})}
+                        </View>
+                    ))}
+                </View>
+
+            </ScrollView>
+        </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Theme.colors.background, paddingTop: 60 },
-  scroll: { padding: 16 },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 10, color: Theme.colors.text },
-  form: {
-      backgroundColor: Theme.colors.surface,
-      padding: 16,
-      borderRadius: 12
+  container: { flex: 1, backgroundColor: Theme.colors.background },
+  backgroundContainer: { ...StyleSheet.absoluteFillObject, backgroundColor: '#050510' },
+  scroll: { paddingHorizontal: 16 },
+
+  ticket: {
+      borderRadius: 24,
+      overflow: 'hidden',
+      padding: 24,
+      borderColor: 'rgba(255,255,255,0.1)',
+      borderWidth: 1,
   },
-  input: {
-      backgroundColor: Theme.colors.surfaceHighlight,
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 10,
-      fontSize: 16,
-      color: Theme.colors.text
-  },
-  row: { flexDirection: 'row' },
-  card: {
+  ticketHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 16,
+      marginBottom: 20
+  },
+  ticketTitle: { fontSize: 18, fontWeight: '700', color: Theme.colors.text },
+  ticketMarket: { fontSize: 14, fontWeight: '600', color: Theme.colors.textSecondary, letterSpacing: 1 },
+
+  segmentContainer: {
+      flexDirection: 'row',
+      backgroundColor: '#1A1A24',
+      borderRadius: 12,
+      padding: 4,
+      marginBottom: 24
+  },
+  segmentBtn: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: 'center',
+      borderRadius: 8,
+  },
+  segmentBtnActiveBuy: { backgroundColor: Theme.colors.buy },
+  segmentBtnActiveSell: { backgroundColor: Theme.colors.sell },
+  segmentText: { color: Theme.colors.textSecondary, fontWeight: '600', fontSize: 14 },
+  segmentTextActive: { color: '#fff' },
+
+  inputGroup: { marginBottom: 16 },
+  inputLabel: { color: Theme.colors.textSecondary, fontSize: 12, marginBottom: 8, marginLeft: 4 },
+  input: {
+      backgroundColor: 'rgba(255,255,255,0.05)',
+      color: '#fff',
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderRadius: 12,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.05)'
+  },
+
+  actionBtn: {
+      marginTop: 8,
+      paddingVertical: 16,
+      borderRadius: 12,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 4
+  },
+  actionBtnText: { color: '#fff', fontWeight: '700', fontSize: 16, textTransform: 'uppercase' },
+
+  listContainer: { marginTop: 16 },
+
+  card: {
       backgroundColor: Theme.colors.surface,
+      borderRadius: 16,
+      padding: 16,
       borderWidth: 1,
       borderColor: Theme.colors.border,
-      borderRadius: 8
-  }
+      position: 'relative'
+  },
+  cardRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 12
+  },
+  badge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      marginRight: 12
+  },
+  badgeText: { fontSize: 12, fontWeight: '800' },
+  marketText: { color: Theme.colors.text, fontWeight: '700', fontSize: 14 },
+
+  detailsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-end'
+  },
+  label: { color: Theme.colors.textSecondary, fontSize: 12, marginBottom: 4 },
+  value: { color: Theme.colors.text, fontSize: 15, fontWeight: '500', fontVariant: ['tabular-nums'] },
+
+  statusText: { fontSize: 12, fontWeight: '700' },
+  cancelBtn: {
+      position: 'absolute',
+      top: 12,
+      right: 12,
+      padding: 4
+  },
+
+  emptyState: { alignItems: 'center', paddingVertical: 40, opacity: 0.5 },
+  emptyText: { color: Theme.colors.textSecondary, marginTop: 12 }
 });
