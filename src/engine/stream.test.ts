@@ -9,7 +9,7 @@ jest.mock('expo-asset', () => ({
   },
 }));
 
-jest.mock('expo-file-system', () => ({
+jest.mock('expo-file-system/legacy', () => ({
   readAsStringAsync: jest.fn().mockResolvedValue(`
     {"type": "trade", "market": "USDT-NGN", "price": 100, "ts": 1, "seq": 1}
     {"type": "ob_delta", "market": "USDT-NGN", "price": 101, "size": 10, "side": "ask", "ts": 2, "seq": 2}

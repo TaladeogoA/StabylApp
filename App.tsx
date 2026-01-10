@@ -39,9 +39,9 @@ export default function App() {
     <View style={{flex: 1}}>
       <RootNavigator />
 
-      <View style={{ position: 'absolute', top: 50, right: 20, zIndex: 999 }}>
+      {/* <View style={{ position: 'absolute', top: 50, right: 20, zIndex: 999 }}>
           <Button title="Debug" onPress={() => setShowInspector(true)} />
-      </View>
+      </View> */}
 
       <StatusBar style="auto" />
     </View>

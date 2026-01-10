@@ -1,5 +1,5 @@
 import { Asset } from 'expo-asset';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { StreamEvent } from '../types';
 
 export class MarketStream {
@@ -10,28 +10,33 @@ export class MarketStream {
     async load() {
         if (this.isLoaded) return;
 
-        const asset = Asset.fromModule(require('../../assets/data/stream/market_stream.ndjson'));
-        await asset.downloadAsync();
+        try {
+            const asset = Asset.fromModule(require('../../assets/data/stream/market_stream.ndjson'));
+            await asset.downloadAsync();
 
-        if (!asset.localUri) {
-            throw new Error('Failed to load stream asset URI');
+            if (!asset.localUri) {
+                throw new Error('Failed to load stream asset URI');
+            }
+
+            const content = await FileSystem.readAsStringAsync(asset.localUri);
+
+            const lines = content.split('\n');
+            this.events = lines
+                .filter(line => line.trim().length > 0)
+                .map(line => {
+                    try {
+                        return JSON.parse(line);
+                    } catch (e) {
+                        return null;
+                    }
+                })
+                .filter(e => e !== null) as StreamEvent[];
+
+            this.isLoaded = true;
+        } catch (error) {
+            console.error('[MarketStream] Error loading stream:', error);
+            throw error;
         }
-
-        const content = await FileSystem.readAsStringAsync(asset.localUri);
-
-        const lines = content.split('\n');
-        this.events = lines
-            .filter(line => line.trim().length > 0)
-            .map(line => {
-                try {
-                    return JSON.parse(line);
-                } catch (e) {
-                    return null;
-                }
-            })
-            .filter(e => e !== null) as StreamEvent[];
-
-        this.isLoaded = true;
     }
 
     reset() {
