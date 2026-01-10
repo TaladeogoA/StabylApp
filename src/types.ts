@@ -35,3 +35,14 @@ export interface TradeData {
     side: string;
     ts: number;
 }
+
+export interface StreamEvent {
+    type: 'trade' | 'ob_delta';
+    market: string;
+    ts: number;
+    seq: number;
+    tradeId?: string;
+    price?: number;
+    size?: number;
+    side?: 'buy' | 'sell' | 'bid' | 'ask';
+}

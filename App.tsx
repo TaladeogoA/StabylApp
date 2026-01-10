@@ -1,7 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { ActivityIndicator, Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Button, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useInitializeDb } from './src/db/useInitializeDb';
+import RootNavigator from './src/navigation/RootNavigator';
 import InspectorScreen from './src/screens/InspectorScreen';
 
 export default function App() {
@@ -12,7 +14,6 @@ export default function App() {
       return (
           <View style={styles.container}>
               <ActivityIndicator size="large" />
-              <Text>Initializing DB...</Text>
           </View>
       );
   }
@@ -35,12 +36,11 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <View style={{flex: 1}}>
+      <RootNavigator />
 
-      {/* DEBUG BUTTON */}
-      <View style={{ marginTop: 20 }}>
-          <Button title="Debug DB" onPress={() => setShowInspector(true)} />
+      <View style={{ position: 'absolute', top: 50, right: 20, zIndex: 999 }}>
+          <Button title="Debug" onPress={() => setShowInspector(true)} />
       </View>
 
       <StatusBar style="auto" />
