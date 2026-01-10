@@ -32,7 +32,7 @@ export default function WalletScreen() {
       try {
           const db = await getDb();
           const rows = await db.getAllAsync<WalletRow>(
-              'SELECT b.asset, b.available, b.locked, a.decimals FROM balances b JOIN assets a ON b.asset = a.assetId'
+              'SELECT b.asset, b.available, b.locked, a.decimals FROM balances b JOIN assets a ON b.asset = a.symbol'
           );
           setBalances(rows);
       } catch (e) {
@@ -61,20 +61,23 @@ export default function WalletScreen() {
 
   const renderItem = ({ item }: { item: WalletRow }) => {
       const total = item.available + item.locked;
+      const formattedTotal = total.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals });
+      const formattedAvailable = item.available.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals });
+      const formattedLocked = item.locked.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals });
 
       return (
           <View style={styles.card}>
               <View style={styles.row}>
                   <Text style={styles.asset}>{item.asset}</Text>
-                  <Text style={styles.total}>{total.toLocaleString()}</Text>
+                  <Text style={styles.total}>{formattedTotal}</Text>
               </View>
               <View style={styles.row}>
                   <Text style={styles.label}>Available:</Text>
-                  <Text style={styles.value}>{item.available.toLocaleString()}</Text>
+                  <Text style={styles.value}>{formattedAvailable}</Text>
               </View>
               <View style={styles.row}>
                   <Text style={styles.label}>Locked:</Text>
-                  <Text style={styles.value}>{item.locked.toLocaleString()}</Text>
+                  <Text style={styles.value}>{formattedLocked}</Text>
               </View>
           </View>
       );

@@ -10,6 +10,7 @@ interface MarketRow {
     ticker: string;
     lastPrice: number;
     change24h: number;
+    is_favorite: number;
 }
 
 export default function MarketsScreen({ navigation }: any) {
@@ -22,7 +23,7 @@ export default function MarketsScreen({ navigation }: any) {
       const db = await getDb();
       try {
           const rows = await db.getAllAsync<MarketRow>(`
-            SELECT m.id, m.ticker,
+            SELECT m.id, m.ticker, m.is_favorite,
             (SELECT price FROM trades WHERE market_id = m.id ORDER BY timestamp DESC LIMIT 1) as lastPrice
             FROM markets m
           `);
@@ -47,6 +48,20 @@ export default function MarketsScreen({ navigation }: any) {
       }, [isReady, isPlaying])
   );
 
+  const toggleFavorite = async (marketId: string) => {
+      const db = await getDb();
+      try {
+          // Toggle the boolean value (using 1 and 0 for SQLite integer)
+          await db.runAsync(
+              'UPDATE markets SET is_favorite = CASE WHEN is_favorite = 1 THEN 0 ELSE 1 END WHERE id = ?',
+              [marketId]
+          );
+          fetchMarkets(); // Refresh list to update UI
+      } catch (e) {
+          console.error(e);
+      }
+  };
+
   const renderItem = ({ item }: { item: MarketRow }) => (
       <TouchableOpacity
         style={styles.card}
@@ -54,7 +69,14 @@ export default function MarketsScreen({ navigation }: any) {
       >
           <View>
               <Text style={styles.ticker}>{item.ticker}</Text>
-              <Text style={styles.subText}>Vol: --</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                 <Text style={styles.subText}>Vol: -- </Text>
+                 <TouchableOpacity onPress={() => toggleFavorite(item.id)} style={{padding: 4}}>
+                     <Text style={{color: item.is_favorite ? Theme.colors.primary : Theme.colors.textSecondary, fontSize: 18}}>
+                         {item.is_favorite ? '★' : '☆'}
+                     </Text>
+                 </TouchableOpacity>
+              </View>
           </View>
           <View style={{alignItems: 'flex-end'}}>
               <Text style={styles.price}>{item.lastPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>

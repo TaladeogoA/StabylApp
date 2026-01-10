@@ -1,6 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { Alert, Button, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import TabSwitcher from '../components/TabSwitcher';
 import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
 
@@ -20,6 +21,7 @@ export default function OrdersScreen() {
   const [amount, setAmount] = useState('');
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('Open Orders');
 
   const fetchOrders = async () => {
       const db = await getDb();
@@ -66,9 +68,14 @@ export default function OrdersScreen() {
                   [requiredAmount, requiredAmount, requiredAsset]
               );
 
+              // Use Date.now() for unique integer ID for SQLite autoincrement compatibility if needed,
+              // but schema uses AUTOINCREMENT. Let's let SQLite handle ID if possible?
+              // Actually schema is: `id INTEGER PRIMARY KEY AUTOINCREMENT`.
+              // We should NOT pass ID manually OR cast it if we do.
+              // Passing manual timestamp as ID on insert
               await db.runAsync(
-                  'INSERT INTO orders (id, market_id, side, price, amount, status, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                  [`${Date.now()}`, marketId, side, p, a, 'open', Date.now()]
+                  'INSERT INTO orders (market_id, side, price, amount, status, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
+                  [marketId, side, p, a, 'open', Date.now()]
               );
           });
 
@@ -99,7 +106,8 @@ export default function OrdersScreen() {
                   [lockedAmount, lockedAmount, lockedAsset]
               );
 
-              await db.runAsync('DELETE FROM orders WHERE id = ?', [order.id]);
+              // Soft Delete: Update status to 'cancelled'
+              await db.runAsync('UPDATE orders SET status = "cancelled" WHERE id = ?', [order.id]);
           });
           Alert.alert('Success', 'Order cancelled');
           fetchOrders();
@@ -108,13 +116,20 @@ export default function OrdersScreen() {
       }
   };
 
+  const filteredOrders = orders.filter(o =>
+      activeTab === 'Open Orders' ? o.status === 'open' : o.status !== 'open'
+  );
+
   const renderItem = ({ item }: { item: OrderRow }) => (
       <View style={styles.card}>
           <View>
               <Text style={{fontWeight: 'bold', color: Theme.colors.text}}>{item.market_id} <Text style={{color: item.side === 'buy' ? Theme.colors.success : Theme.colors.error}}>{item.side.toUpperCase()}</Text></Text>
               <Text style={{color: Theme.colors.textSecondary}}>{item.amount} @ {item.price}</Text>
+              {item.status !== 'open' && <Text style={{fontSize: 10, color: Theme.colors.textSecondary}}>Status: {item.status}</Text>}
           </View>
-          <Button title="Cancel" onPress={() => cancelOrder(item)} color={Theme.colors.error} />
+          {item.status === 'open' && (
+              <Button title="Cancel" onPress={() => cancelOrder(item)} color={Theme.colors.error} />
+          )}
       </View>
   );
 
@@ -154,9 +169,16 @@ export default function OrdersScreen() {
                 </View>
             </View>
 
-            <Text style={[styles.header, { marginTop: 20 }]}>Open Orders</Text>
-            {orders.length === 0 && <Text style={{textAlign: 'center', color: Theme.colors.textSecondary}}>No open orders</Text>}
-            {orders.map(item => (
+            <View style={{marginTop: 20}}>
+                <TabSwitcher
+                    tabs={['Open Orders', 'History']}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                />
+            </View>
+
+            {filteredOrders.length === 0 && <Text style={{textAlign: 'center', color: Theme.colors.textSecondary, marginTop: 20}}>No {activeTab.toLowerCase()}</Text>}
+            {filteredOrders.map(item => (
                 <View key={item.id} style={{marginBottom: 10}}>
                    {renderItem({item})}
                 </View>
