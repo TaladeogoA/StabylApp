@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: Theme.typography.bold.fontFamily,
     color: Theme.colors.text,
     marginBottom: 12,
   },
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 14,
     color: Theme.colors.text,
-    fontWeight: '600',
+    fontFamily: Theme.typography.medium.fontFamily,
     fontVariant: ['tabular-nums'],
   },
 });

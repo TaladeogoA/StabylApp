@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { BlurView } from 'expo-blur';
 import React, { useCallback, useState } from 'react';
@@ -13,28 +12,16 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import Animated, {
-    FadeInDown,
-    FadeOutRight,
-    Layout
-} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import TabSwitcher from '../components/TabSwitcher';
+import OrdersList from '../components/OrdersList';
+import ScreenHeader from '../components/ScreenHeader';
 import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
-
-interface OrderRow {
-    id: string;
-    market_id: string;
-    side: 'buy' | 'sell';
-    price: number;
-    amount: number;
-    status: string;
-    timestamp: number;
-}
+import { OrderRow } from '../types';
 
 export default function OrdersScreen() {
   const [marketId, setMarketId] = useState('USDT-NGN');
+  const [markets, setMarkets] = useState<{id: string}[]>([]);
   const [price, setPrice] = useState('');
   const [amount, setAmount] = useState('');
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
@@ -43,16 +30,24 @@ export default function OrdersScreen() {
   const [activeTab, setActiveTab] = useState('Open Orders');
   const insets = useSafeAreaInsets();
 
+  const fetchMarkets = async () => {
+      const db = await getDb();
+      const rows = await db.getAllAsync<{id: string}>('SELECT id FROM markets');
+      setMarkets(rows);
+  };
+
+
   const fetchOrders = async () => {
       const db = await getDb();
-      const rows = await db.getAllAsync<OrderRow>('SELECT * FROM orders ORDER BY timestamp DESC');
+      const rows = await db.getAllAsync<OrderRow>('SELECT * FROM orders WHERE market_id = ? ORDER BY timestamp DESC', [marketId]);
       setOrders(rows);
   };
 
   useFocusEffect(
       useCallback(() => {
+          fetchMarkets();
           fetchOrders();
-      }, [])
+      }, [marketId])
   );
 
   const handlePlaceOrder = async () => {
@@ -123,93 +118,73 @@ export default function OrdersScreen() {
 
               await db.runAsync('UPDATE orders SET status = "cancelled" WHERE id = ?', [order.id]);
           });
-          // Alert.alert('Success', 'Order cancelled'); // Removed for smoother flow
           fetchOrders();
       } catch (e: any) {
           Alert.alert('Error', e.message);
       }
   };
 
-  const filteredOrders = orders.filter(o =>
-      activeTab === 'Open Orders' ? o.status === 'open' : o.status !== 'open'
-  );
 
-  const renderItem = ({ item, index }: { item: OrderRow, index: number }) => (
-      <Animated.View
-        entering={FadeInDown.delay(index * 50)}
-        exiting={FadeOutRight}
-        layout={Layout.springify()}
-        style={styles.card}
-      >
-          <View style={styles.cardRow}>
-              <View style={[styles.badge, { backgroundColor: item.side === 'buy' ? 'rgba(39, 196, 133, 0.2)' : 'rgba(255, 59, 48, 0.2)' }]}>
-                  <Text style={[styles.badgeText, { color: item.side === 'buy' ? Theme.colors.buy : Theme.colors.sell }]}>
-                      {item.side.toUpperCase()}
-                  </Text>
-              </View>
-              <Text style={styles.marketText}>{item.market_id}</Text>
-          </View>
-
-          <View style={styles.detailsRow}>
-              <View>
-                  <Text style={styles.label}>Price</Text>
-                  <Text style={styles.value}>{item.price}</Text>
-              </View>
-              <View>
-                  <Text style={styles.label}>Amount</Text>
-                  <Text style={styles.value}>{item.amount}</Text>
-              </View>
-              <View>
-                   <Text style={[styles.statusText, { color: item.status === 'open' ? Theme.colors.accent : Theme.colors.textSecondary }]}>
-                       {item.status.toUpperCase()}
-                   </Text>
-              </View>
-          </View>
-
-          {item.status === 'open' && (
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => cancelOrder(item)}>
-                  <Ionicons name="close-circle-outline" size={24} color={Theme.colors.textSecondary} />
-              </TouchableOpacity>
-          )}
-      </Animated.View>
-  );
 
   return (
+
+
     <View style={styles.container}>
         <View style={styles.backgroundContainer} />
+        <View style={{ paddingTop: insets.top }}>
+            <ScreenHeader title="Trade" />
+        </View>
 
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
         >
-            <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 20, paddingBottom: 100 }]}>
+            <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: 100 }]}>
 
-                {/* Glass Order Ticket */}
                 <BlurView intensity={30} tint="dark" style={styles.ticket}>
                     <View style={styles.ticketHeader}>
                         <Text style={styles.ticketTitle}>Limit Order</Text>
                         <Text style={styles.ticketMarket}>{marketId}</Text>
                     </View>
 
-                    {/* Segmented Control */}
                     <View style={styles.segmentContainer}>
                         <TouchableOpacity
-                            style={[styles.segmentBtn, side === 'buy' && styles.segmentBtnActiveBuy]}
+                            style={[styles.segmentBtn, side === 'buy' && styles.segmentBtnActive]}
                             onPress={() => setSide('buy')}
                         >
                             <Text style={[styles.segmentText, side === 'buy' && styles.segmentTextActive]}>Buy</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.segmentBtn, side === 'sell' && styles.segmentBtnActiveSell]}
+                            style={[styles.segmentBtn, side === 'sell' && styles.segmentBtnActive]}
                             onPress={() => setSide('sell')}
                         >
                             <Text style={[styles.segmentText, side === 'sell' && styles.segmentTextActive]}>Sell</Text>
                         </TouchableOpacity>
                     </View>
 
-                    {/* Inputs */}
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+                        {markets.map((m) => (
+                            <TouchableOpacity
+                                key={m.id}
+                                onPress={() => setMarketId(m.id)}
+                                style={[
+                                    styles.marketPill,
+                                    marketId === m.id && styles.marketPillActive,
+                                    { borderColor: marketId === m.id ? Theme.colors.accent : Theme.colors.surfaceHighlight }
+                                ]}
+                            >
+                                <Text style={[
+                                    styles.marketPillText,
+                                    marketId === m.id && { color: '#fff', fontFamily: Theme.typography.bold.fontFamily }
+                                ]}>
+                                    {m.id}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+
                     <View style={styles.inputGroup}>
-                        <Text style={styles.inputLabel}>Price (USDT)</Text>
+                        <Text style={styles.inputLabel}>Price ({marketId.split('-')[1]})</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="0.00"
@@ -231,7 +206,13 @@ export default function OrdersScreen() {
                         />
                     </View>
 
-                    {/* Action Button */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16, paddingHorizontal: 4 }}>
+                        <Text style={{ color: Theme.colors.textSecondary, fontSize: 13, fontFamily: Theme.typography.medium.fontFamily }}>Total</Text>
+                        <Text style={{ color: Theme.colors.text, fontSize: 13, fontFamily: Theme.typography.bold.fontFamily }}>
+                            ≈ {((parseFloat(price) || 0) * (parseFloat(amount) || 0)).toFixed(2)} {marketId.split('-')[1]}
+                        </Text>
+                    </View>
+
                     <TouchableOpacity
                         style={[
                             styles.actionBtn,
@@ -247,28 +228,12 @@ export default function OrdersScreen() {
 
                 </BlurView>
 
-                {/* Orders List */}
-                <View style={{marginTop: 32}}>
-                    <TabSwitcher
-                        tabs={['Open Orders', 'History']}
-                        activeTab={activeTab}
-                        onTabChange={setActiveTab}
-                    />
-                </View>
-
-                <View style={styles.listContainer}>
-                    {filteredOrders.length === 0 && (
-                        <View style={styles.emptyState}>
-                            <Ionicons name="list-outline" size={48} color={Theme.colors.surfaceHighlight} />
-                            <Text style={styles.emptyText}>No {activeTab.toLowerCase()}</Text>
-                        </View>
-                    )}
-                    {filteredOrders.map((item, index) => (
-                        <View key={item.id} style={{marginBottom: 12}}>
-                            {renderItem({item, index})}
-                        </View>
-                    ))}
-                </View>
+                <OrdersList
+                    orders={orders}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    onCancel={cancelOrder}
+                />
 
             </ScrollView>
         </KeyboardAvoidingView>
@@ -277,110 +242,118 @@ export default function OrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Theme.colors.background },
-  backgroundContainer: { ...StyleSheet.absoluteFillObject, backgroundColor: '#050510' },
-  scroll: { paddingHorizontal: 16 },
+container: {
+    flex: 1,
+    backgroundColor: Theme.colors.background
+},
+backgroundContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#050510'
+},
+scroll: {
+    paddingHorizontal: 16
+},
+ticket: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    padding: 24,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1,
+},
+ticketHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20
+},
+ticketTitle: {
+    fontSize: 18,
+    fontFamily: Theme.typography.bold.fontFamily,
+    color: Theme.colors.text
+},
+ticketMarket: {
+    fontSize: 14,
+    fontFamily: Theme.typography.medium.fontFamily,
+    color: Theme.colors.textSecondary,
+    letterSpacing: 1
+},
+marketPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginRight: 8,
+    backgroundColor: 'rgba(255,255,255,0.05)'
+},
+marketPillActive: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+},
+marketPillText: {
+    color: Theme.colors.textSecondary,
+    fontSize: 13,
+    fontFamily: Theme.typography.medium.fontFamily
+},
+segmentContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#1A1A24',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 24
+},
+segmentBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 8,
+},
+segmentBtnActive: {
+    backgroundColor: Theme.colors.surfaceHighlight,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)'
+},
+segmentText: {
+    color: Theme.colors.textSecondary,
+    fontFamily: Theme.typography.medium.fontFamily,
+    fontSize: 14
+},
+segmentTextActive: {
+    color: '#fff'
+},
 
-  ticket: {
-      borderRadius: 24,
-      overflow: 'hidden',
-      padding: 24,
-      borderColor: 'rgba(255,255,255,0.1)',
-      borderWidth: 1,
-  },
-  ticketHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 20
-  },
-  ticketTitle: { fontSize: 18, fontWeight: '700', color: Theme.colors.text },
-  ticketMarket: { fontSize: 14, fontWeight: '600', color: Theme.colors.textSecondary, letterSpacing: 1 },
-
-  segmentContainer: {
-      flexDirection: 'row',
-      backgroundColor: '#1A1A24',
-      borderRadius: 12,
-      padding: 4,
-      marginBottom: 24
-  },
-  segmentBtn: {
-      flex: 1,
-      paddingVertical: 10,
-      alignItems: 'center',
-      borderRadius: 8,
-  },
-  segmentBtnActiveBuy: { backgroundColor: Theme.colors.buy },
-  segmentBtnActiveSell: { backgroundColor: Theme.colors.sell },
-  segmentText: { color: Theme.colors.textSecondary, fontWeight: '600', fontSize: 14 },
-  segmentTextActive: { color: '#fff' },
-
-  inputGroup: { marginBottom: 16 },
-  inputLabel: { color: Theme.colors.textSecondary, fontSize: 12, marginBottom: 8, marginLeft: 4 },
-  input: {
-      backgroundColor: 'rgba(255,255,255,0.05)',
-      color: '#fff',
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-      borderRadius: 12,
-      fontSize: 16,
-      borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.05)'
-  },
-
-  actionBtn: {
-      marginTop: 8,
-      paddingVertical: 16,
-      borderRadius: 12,
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 4
-  },
-  actionBtnText: { color: '#fff', fontWeight: '700', fontSize: 16, textTransform: 'uppercase' },
-
-  listContainer: { marginTop: 16 },
-
-  card: {
-      backgroundColor: Theme.colors.surface,
-      borderRadius: 16,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: Theme.colors.border,
-      position: 'relative'
-  },
-  cardRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12
-  },
-  badge: {
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 6,
-      marginRight: 12
-  },
-  badgeText: { fontSize: 12, fontWeight: '800' },
-  marketText: { color: Theme.colors.text, fontWeight: '700', fontSize: 14 },
-
-  detailsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-end'
-  },
-  label: { color: Theme.colors.textSecondary, fontSize: 12, marginBottom: 4 },
-  value: { color: Theme.colors.text, fontSize: 15, fontWeight: '500', fontVariant: ['tabular-nums'] },
-
-  statusText: { fontSize: 12, fontWeight: '700' },
-  cancelBtn: {
-      position: 'absolute',
-      top: 12,
-      right: 12,
-      padding: 4
-  },
-
-  emptyState: { alignItems: 'center', paddingVertical: 40, opacity: 0.5 },
-  emptyText: { color: Theme.colors.textSecondary, marginTop: 12 }
+inputGroup: {
+    marginBottom: 16
+},
+inputLabel: {
+    color: Theme.colors.textSecondary,
+    fontSize: 12,
+    marginBottom: 8,
+    marginLeft: 4
+},
+input: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    color: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)'
+},
+actionBtn: {
+    marginTop: 8,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4
+},
+actionBtnText: {
+    color: '#fff',
+    fontFamily: Theme.typography.bold.fontFamily,
+    fontSize: 16,
+    textTransform: 'uppercase'
+}
 });

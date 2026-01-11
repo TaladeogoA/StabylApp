@@ -6,7 +6,7 @@ export const Theme = {
         text: '#FFFFFF',
         textSecondary: '#8F9BB3',
         primary: '#FFFFFF',
-        accent: '#D4FF00',
+        accent: '#FFFFFF',
         success: '#27C485',
         error: '#FF3B30',
         buy: '#27C485',
@@ -31,6 +31,9 @@ export const Theme = {
         pill: 999
     },
     typography: {
-        brand: { fontWeight: '900', letterSpacing: 1 },
+        brand: { fontFamily: 'DMSans_700Bold', letterSpacing: 1 },
+        regular: { fontFamily: 'DMSans_400Regular' },
+        medium: { fontFamily: 'DMSans_500Medium' },
+        bold: { fontFamily: 'DMSans_700Bold' },
     }
 };

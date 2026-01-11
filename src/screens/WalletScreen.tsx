@@ -1,21 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { BlurView } from 'expo-blur';
 import React, { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import Animated, { FadeInDown, FadeOutUp, Layout } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ScreenHeader from '../components/ScreenHeader';
+import WalletRowItem from '../components/WalletRowItem';
 import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
-
-interface WalletRow {
-    asset: string;
-    available: number;
-    locked: number;
-    decimals: number;
-    usdtValue?: number;
-}
+import { WalletRow } from '../types';
 
 const STORAGE_KEY_HIDE_SMALL = 'settings_hide_small_balances';
 
@@ -63,7 +56,7 @@ export default function WalletScreen() {
                   const trade = await db.getFirstAsync<{ price: number }>(
                       'SELECT price FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 1',
                       [marketId]
-                  );
+                   );
                   price = trade?.price || 0;
               }
 
@@ -102,58 +95,15 @@ export default function WalletScreen() {
       return (b.usdtValue || 0) >= 1;
   });
 
-  const renderItem = ({ item, index }: { item: WalletRow, index: number }) => {
-      const total = item.available + item.locked;
-      const formattedTotal = total.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals });
-      const usdtVal = item.usdtValue?.toLocaleString(undefined, { maximumFractionDigits: 2 });
-
-      return (
-          <Animated.View
-            entering={FadeInDown.delay(index * 50).springify()}
-            exiting={FadeOutUp}
-            layout={Layout.springify()}
-            style={{marginBottom: 12}}
-          >
-              <BlurView intensity={20} tint="dark" style={styles.card}>
-                  <View style={styles.cardHeader}>
-                      <View style={styles.assetInfo}>
-                           <View style={[styles.iconCircle, { backgroundColor: Theme.colors.background }]}>
-                               <Text style={styles.iconText}>{item.asset[0]}</Text>
-                           </View>
-                           <View>
-                               <Text style={styles.assetSymbol}>{item.asset}</Text>
-                               <Text style={styles.assetName}>Asset</Text>
-                           </View>
-                      </View>
-                      <View style={styles.valueInfo}>
-                          <Text style={styles.usdtValue}>{formattedTotal} {item.asset}</Text>
-                          <Text style={styles.amountValue}>≈ ${usdtVal}</Text>
-                      </View>
-                  </View>
-
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailsRow}>
-                      <View>
-                          <Text style={styles.label}>Available</Text>
-                          <Text style={styles.subValue}>{item.available.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals })}</Text>
-                      </View>
-                      <View style={{alignItems: 'flex-end'}}>
-                          <Text style={styles.label}>Locked</Text>
-                          <Text style={styles.subValue}>{item.locked.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals })}</Text>
-                      </View>
-                  </View>
-              </BlurView>
-          </Animated.View>
-      );
-  };
-
   return (
-    <View style={styles.container}>
+
+
+    <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.backgroundContainer} />
+        <ScreenHeader title="Wallet" />
 
         <ScrollView
-            contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 20 }]}
+            contentContainerStyle={[styles.scroll]}
             refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchBalances} tintColor={Theme.colors.text} />}
         >
             <View style={styles.header}>
@@ -184,9 +134,7 @@ export default function WalletScreen() {
 
             <View style={styles.listContainer}>
                 {filteredBalances.map((item, index) => (
-                    <React.Fragment key={item.asset}>
-                        {renderItem({ item, index })}
-                    </React.Fragment>
+                    <WalletRowItem key={item.asset} item={item} index={index} />
                 ))}
             </View>
 
@@ -222,7 +170,7 @@ container: {
   },
   headerValue: {
       fontSize: 40,
-      fontWeight: '800',
+      fontFamily: Theme.typography.brand.fontFamily,
       color: '#fff',
       marginBottom: 8
   },
@@ -234,7 +182,7 @@ container: {
   },
   pnlText: {
       color: Theme.colors.buy,
-      fontWeight: '700',
+      fontFamily: Theme.typography.bold.fontFamily,
       fontSize: 12
   },
 
@@ -248,84 +196,10 @@ container: {
   },
   toggleLabel: {
       color: Theme.colors.textSecondary,
-      fontWeight: '600'
+      fontFamily: Theme.typography.medium.fontFamily
   },
 
   listContainer: {
       marginTop: 8
-  },
-
-  card: {
-      borderRadius: 20,
-      padding: 20,
-      borderColor: 'rgba(255,255,255,0.08)',
-      borderWidth: 1,
-      overflow: 'hidden'
-  },
-  cardHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-  },
-  assetInfo: {
-      flexDirection: 'row',
-      alignItems: 'center'
-  },
-  iconCircle: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: 12
-  },
-  iconText: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: Theme.colors.text
-  },
-  assetSymbol: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: '#fff'
-  },
-  assetName: {
-      fontSize: 12,
-      color: Theme.colors.textSecondary
-  },
-  valueInfo: {
-      alignItems: 'flex-end'
-  },
-  usdtValue: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: '#fff'
-  },
-  amountValue: {
-      fontSize: 12,
-      color: Theme.colors.textSecondary,
-      marginTop: 2
-  },
-
-  divider: {
-      height: 1,
-      backgroundColor: 'rgba(255,255,255,0.08)',
-      marginVertical: 16
-  },
-
-  detailsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between'
-  },
-  label: {
-      fontSize: 11,
-      color: Theme.colors.textSecondary,
-      textTransform: 'uppercase',
-      marginBottom: 4
-  },
-  subValue: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: Theme.colors.text
   }
 });

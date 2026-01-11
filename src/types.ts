@@ -46,3 +46,29 @@ export interface StreamEvent {
     size?: number;
     side?: 'buy' | 'sell' | 'bid' | 'ask';
 }
+
+export interface MarketRow {
+    id: string;
+    ticker: string;
+    lastPrice: number;
+    change24h: number;
+    is_favorite: number;
+}
+
+export interface OrderRow {
+    id: string;
+    market_id: string;
+    side: 'buy' | 'sell';
+    price: number;
+    amount: number;
+    status: string;
+    timestamp: number;
+}
+
+export interface WalletRow {
+    asset: string;
+    available: number;
+    locked: number;
+    decimals: number;
+    usdtValue?: number;
+}

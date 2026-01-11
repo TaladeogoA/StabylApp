@@ -1,17 +1,24 @@
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_700Bold,
+  useFonts
+} from '@expo-google-fonts/dm-sans';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { ActivityIndicator, Button, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Theme } from './src/constants/Theme';
 import { useInitializeDb } from './src/db/useInitializeDb';
 import RootNavigator from './src/navigation/RootNavigator';
-import InspectorScreen from './src/screens/InspectorScreen';
 
 export default function App() {
   const { isReady, error } = useInitializeDb();
-  const [showInspector, setShowInspector] = useState(false);
+  const [fontsLoaded] = useFonts({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_700Bold,
+  });
 
-  if (!isReady) {
+  if (!isReady || !fontsLoaded) {
       return (
           <View style={styles.container}>
               <ActivityIndicator size="large" />
@@ -27,23 +34,9 @@ export default function App() {
     );
   }
 
-  if (showInspector) {
-     return (
-         <SafeAreaView style={{flex: 1}}>
-             <Button title="Close Inspector" onPress={() => setShowInspector(false)} />
-             <InspectorScreen />
-         </SafeAreaView>
-     );
-  }
-
   return (
     <View style={{flex: 1, backgroundColor: Theme.colors.background}}>
       <RootNavigator />
-
-      {/* <View style={{ position: 'absolute', top: 50, right: 20, zIndex: 999 }}>
-          <Button title="Debug" onPress={() => setShowInspector(true)} />
-      </View> */}
-
       <StatusBar style="light" />
     </View>
   );

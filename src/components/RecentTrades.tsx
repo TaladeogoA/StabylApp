@@ -82,14 +82,14 @@ const styles = StyleSheet.create({
   },
   cell: {
       fontSize: 13,
-      fontWeight: '600',
+      fontFamily: Theme.typography.medium.fontFamily,
       width: '30%',
       color: Theme.colors.text,
       fontVariant: ['tabular-nums']
   },
   headerCell: {
       fontSize: 11,
-      fontWeight: 'bold',
+      fontFamily: Theme.typography.bold.fontFamily,
       width: '30%',
       color: Theme.colors.textSecondary,
       textTransform: 'uppercase'
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   headerCellTime: {
       fontSize: 11,
-      fontWeight: 'bold',
+      fontFamily: Theme.typography.bold.fontFamily,
       width: '30%',
       color: Theme.colors.textSecondary,
       textAlign: 'right',

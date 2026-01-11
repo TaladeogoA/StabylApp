@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
       height: 24,
       alignItems: 'center'
   },
-  cell: { fontSize: 11, fontWeight: '700', zIndex: 2, fontVariant: ['tabular-nums'] },
+  cell: { fontSize: 11, fontFamily: Theme.typography.bold.fontFamily, zIndex: 2, fontVariant: ['tabular-nums'] },
   bar: {
       position: 'absolute',
       top: 1,

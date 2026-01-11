@@ -48,7 +48,6 @@ export default function GlassTabBar({ state, descriptors, navigation }: BottomTa
               accessibilityRole="button"
               accessibilityState={isFocused ? { selected: true } : {}}
               accessibilityLabel={options.tabBarAccessibilityLabel}
-              testID={options.tabBarTestID}
               onPress={onPress}
               onLongPress={onLongPress}
               style={styles.tab}
@@ -89,7 +88,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: Theme.typography.medium.fontFamily,
     letterSpacing: 0.5,
     textTransform: 'uppercase'
   },

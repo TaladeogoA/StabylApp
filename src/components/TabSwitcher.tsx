@@ -45,12 +45,12 @@ const styles = StyleSheet.create({
   },
   text: {
       color: Theme.colors.textSecondary,
-      fontWeight: '600',
+      fontFamily: Theme.typography.medium.fontFamily,
       fontSize: 14
   },
   activeText: {
       color: Theme.colors.text,
-      fontWeight: 'bold'
+      fontFamily: Theme.typography.bold.fontFamily
   },
   indicator: {
       position: 'absolute',

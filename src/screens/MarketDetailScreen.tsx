@@ -14,7 +14,7 @@ import { useMarketStream } from '../hooks/useMarketStream';
 
 export default function MarketDetailScreen({ route, navigation }: any) {
   const { marketId } = route.params || { marketId: 'USDT-NGN' };
-  const { isPlaying, togglePlay } = useMarketStream();
+  const { isPlaying, togglePlay, status, replay } = useMarketStream();
   const [activeTab, setActiveTab] = useState('Order Book');
   const [marketData, setMarketData] = useState<any>(null);
   const insets = useSafeAreaInsets();
@@ -56,8 +56,8 @@ export default function MarketDetailScreen({ route, navigation }: any) {
               <Ionicons name="chevron-back" size={28} color={Theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{marketId.replace('-', ' / ')}</Text>
-          <TouchableOpacity onPress={togglePlay} style={styles.iconButton}>
-              <Ionicons name={isPlaying ? "pause" : "play"} size={22} color={Theme.colors.accent} />
+          <TouchableOpacity onPress={status === 'finished' ? replay : togglePlay} style={styles.iconButton}>
+              <Ionicons name={status === 'finished' ? "refresh-circle" : (isPlaying ? "pause-circle" : "play-circle")} size={28} color={Theme.colors.accent} />
           </TouchableOpacity>
        </BlurView>
 
@@ -94,39 +94,54 @@ export default function MarketDetailScreen({ route, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Theme.colors.background },
-  header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 16,
-      paddingBottom: 12,
-      zIndex: 10,
-      backgroundColor: 'rgba(0,0,0,0.3)'
-  },
-  backButton: { padding: 8 },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: Theme.colors.text, letterSpacing: 1 },
-  iconButton: { padding: 8 },
-
-  heroSection: {
-      alignItems: 'center',
-      paddingVertical: 24,
-      borderBottomWidth: 1,
-      borderBottomColor: Theme.colors.surfaceHighlight
-  },
-  heroPrice: {
-      fontSize: 36,
-      fontWeight: '800',
-      fontVariant: ['tabular-nums'],
-      letterSpacing: -1,
-      marginBottom: 8
-  },
-  pill: {
-      paddingHorizontal: 12,
-      paddingVertical: 4,
-      borderRadius: 12,
-  },
-  changeText: { fontSize: 14, fontWeight: '700' },
-
-  content: { flex: 1 }
+container: {
+    flex: 1,
+    backgroundColor: Theme.colors.background
+},
+header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.3)'
+},
+backButton: {
+    padding: 8
+},
+headerTitle: {
+    fontSize: 16,
+    fontFamily: Theme.typography.bold.fontFamily,
+    color: Theme.colors.text,
+    letterSpacing: 1
+},
+iconButton: {
+    padding: 8
+},
+heroSection: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: Theme.colors.surfaceHighlight
+},
+heroPrice: {
+    fontSize: 36,
+    fontFamily: Theme.typography.brand.fontFamily,
+    fontVariant: ['tabular-nums'],
+    letterSpacing: -1,
+    marginBottom: 8
+},
+pill: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+},
+changeText: {
+    fontSize: 14,
+    fontFamily: Theme.typography.bold.fontFamily
+},
+content: {
+    flex: 1
+}
 });

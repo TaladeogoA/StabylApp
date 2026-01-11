@@ -42,14 +42,14 @@ function MainTabs() {
            ),
            headerTintColor: Theme.colors.text,
            headerTitleStyle: {
-               fontWeight: Theme.typography.brand.fontWeight as any,
+               fontFamily: Theme.typography.brand.fontFamily,
                letterSpacing: Theme.typography.brand.letterSpacing
            },
        }}
     >
-      <Tab.Screen name="Markets" component={MarketsScreen} />
-      <Tab.Screen name="Orders" component={OrdersScreen} />
-      <Tab.Screen name="Wallet" component={WalletScreen} />
+      <Tab.Screen name="Markets" component={MarketsScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Orders" component={OrdersScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Wallet" component={WalletScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 }
