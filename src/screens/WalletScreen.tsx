@@ -92,7 +92,7 @@ export default function WalletScreen() {
       if (!hideSmall) return true;
       const amount = b.available + b.locked;
       if (amount === 0) return false;
-      return (b.usdtValue || 0) >= 1;
+      return (b.usdtValue || 0) >= 10;
   });
 
   return (
