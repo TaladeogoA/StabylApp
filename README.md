@@ -108,7 +108,7 @@ The tests use `better-sqlite3` to simulate the mobile SQLite environment and ver
 ---
 
 ## Demo
-https://youtube.com/shorts/3Bjg-u9K_ac?feature=share
+https://youtube.com/shorts/x9we8ITeqrc
 
 ---
 
