@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { processStreamEvent } from '../engine/orderBookOps';
-import { createTestDb } from '../tests/testDbUtils';
+import { createTestDb } from './testDbUtils';
 
 describe('OrderBookOps Integration', () => {
     let db: SQLite.SQLiteDatabase;
