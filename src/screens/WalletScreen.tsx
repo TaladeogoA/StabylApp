@@ -10,6 +10,8 @@ import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
 import { WalletRow } from '../types';
 
+import { calculatePortfolioValue, getCurrentTimestamp, getPriceAtTime } from '../utils/pnl';
+
 const STORAGE_KEY_HIDE_SMALL = 'settings_hide_small_balances';
 
 export default function WalletScreen() {
@@ -17,6 +19,7 @@ export default function WalletScreen() {
   const [hideSmall, setHideSmall] = useState(false);
   const [loading, setLoading] = useState(true);
   const [totalUsd, setTotalUsd] = useState(0);
+  const [pnlPercent, setPnlPercent] = useState<number | null>(null);
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -36,29 +39,13 @@ export default function WalletScreen() {
               'SELECT b.asset, b.available, b.locked, a.decimals FROM balances b JOIN assets a ON b.asset = a.symbol'
           );
 
+          // 1. Get "Now" from stream time
+          const now = await getCurrentTimestamp(db);
+          const yesterday = now - (24 * 60 * 60 * 1000);
+
           const enrichedBalances = await Promise.all(balanceRows.map(async (b) => {
               const totalAmount = b.available + b.locked;
-              let price = 0;
-
-              if (b.asset === 'USDT' || b.asset === 'USDC') {
-                  price = 1;
-              } else if (b.asset === 'NGN') {
-                   const marketId = 'USDT-NGN';
-                   const trade = await db.getFirstAsync<{ price: number }>(
-                      'SELECT price FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 1',
-                      [marketId]
-                   );
-                   if (trade && trade.price > 0) {
-                       price = 1 / trade.price;
-                   }
-              } else {
-                  const marketId = `${b.asset}-USDT`;
-                  const trade = await db.getFirstAsync<{ price: number }>(
-                      'SELECT price FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 1',
-                      [marketId]
-                   );
-                  price = trade?.price || 0;
-              }
+              const price = await getPriceAtTime(db, b.asset, now);
 
               return {
                   ...b,
@@ -66,9 +53,21 @@ export default function WalletScreen() {
               };
           }));
 
-          const total = enrichedBalances.reduce((acc, curr) => acc + (curr.usdtValue || 0), 0);
+          const totalNow = enrichedBalances.reduce((acc, curr) => acc + (curr.usdtValue || 0), 0);
 
-          setTotalUsd(total);
+          // 2. Calculate 24h ago value efficiently
+          // We pass the raw balance rows to calculatePortfolioValue - it handles the logic
+          // Note: This assumes balances didn't change (simplified PnL based on *current* holdings performance)
+          // which is standard for "Day's PnL" display in most wallets.
+          const totalYesterday = await calculatePortfolioValue(db, balanceRows, yesterday);
+
+          let calculatedPnl = 0;
+          if (totalYesterday > 0) {
+              calculatedPnl = ((totalNow - totalYesterday) / totalYesterday) * 100;
+          }
+
+          setTotalUsd(totalNow);
+          setPnlPercent(calculatedPnl);
           setBalances(enrichedBalances);
       } catch (e) {
           console.error(e);
@@ -111,8 +110,10 @@ export default function WalletScreen() {
                 <Text style={styles.headerValue}>
                     ${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Text>
-                <View style={styles.pnlTag}>
-                    <Text style={styles.pnlText}>+2.45% (24h)</Text>
+                <View style={[styles.pnlTag, { backgroundColor: (pnlPercent || 0) >= 0 ? 'rgba(39, 196, 133, 0.15)' : 'rgba(255, 59, 48, 0.15)' }]}>
+                    <Text style={[styles.pnlText, { color: (pnlPercent || 0) >= 0 ? Theme.colors.buy : Theme.colors.sell }]}>
+                        {(pnlPercent || 0) > 0 ? '+' : ''}{(pnlPercent || 0).toFixed(2)}% (24h)
+                    </Text>
                 </View>
             </View>
 
