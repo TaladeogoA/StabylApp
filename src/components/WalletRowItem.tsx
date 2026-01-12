@@ -11,8 +11,6 @@ interface WalletRowProps {
 }
 
 const WalletRowItem = ({ item, index }: WalletRowProps) => {
-    const total = item.available + item.locked;
-    const formattedTotal = total.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals });
     const usdtVal = item.usdtValue?.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
     return (
@@ -34,21 +32,15 @@ const WalletRowItem = ({ item, index }: WalletRowProps) => {
                         </View>
                     </View>
                     <View style={styles.valueInfo}>
-                        <Text style={styles.usdtValue}>{formattedTotal} {item.asset}</Text>
+                        <View style={styles.balanceRow}>
+                            <Text style={styles.labelCompact}>Available:</Text>
+                            <Text style={styles.valueCompact}>{item.available.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals })}</Text>
+                        </View>
+                        <View style={styles.balanceRow}>
+                            <Text style={styles.labelCompact}>In Orders:</Text>
+                            <Text style={styles.valueCompact}>{item.locked.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals })}</Text>
+                        </View>
                         <Text style={styles.amountValue}>≈ ${usdtVal}</Text>
-                    </View>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.detailsRow}>
-                    <View>
-                        <Text style={styles.label}>Available</Text>
-                        <Text style={styles.subValue}>{item.available.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals })}</Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={styles.label}>Locked</Text>
-                        <Text style={styles.subValue}>{item.locked.toLocaleString(undefined, { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals })}</Text>
                     </View>
                 </View>
             </BlurView>
@@ -98,35 +90,27 @@ const styles = StyleSheet.create({
     valueInfo: {
         alignItems: 'flex-end'
     },
-    usdtValue: {
-        fontSize: 16,
-        fontFamily: Theme.typography.bold.fontFamily,
-        color: '#fff'
-    },
     amountValue: {
         fontSize: 12,
         color: Theme.colors.textSecondary,
         marginTop: 2
     },
-    divider: {
-        height: 1,
-        backgroundColor: 'rgba(255,255,255,0.08)',
-        marginVertical: 16
-    },
-    detailsRow: {
+    balanceRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        marginBottom: 2
     },
-    label: {
-        fontSize: 11,
+    labelCompact: {
+        fontSize: 12,
         color: Theme.colors.textSecondary,
-        textTransform: 'uppercase',
-        marginBottom: 4
+        marginRight: 6
     },
-    subValue: {
+    valueCompact: {
         fontSize: 14,
         fontFamily: Theme.typography.medium.fontFamily,
-        color: Theme.colors.text
+        color: Theme.colors.text,
+        fontVariant: ['tabular-nums']
     }
 });
 

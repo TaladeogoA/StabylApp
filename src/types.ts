@@ -55,6 +55,9 @@ export interface MarketRow {
     is_favorite: boolean;
     initialLastPrice?: number;
     initialChange24h?: number;
+    lastSide?: string;
+    spread?: number;
+    spreadPercent?: number;
 }
 
 export interface OrderRow {

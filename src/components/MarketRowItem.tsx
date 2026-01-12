@@ -61,12 +61,19 @@ const MarketRowItem = ({ item, navigation, toggleFavorite }: MarketRowItemProps)
                             {item.is_favorite ? '★' : '☆'}
                         </Animated.Text>
                     </TouchableOpacity>
-                    <Text style={styles.subText}>Vol $24.5M</Text>
+                    <Text style={styles.subText}>Spread {item.spread?.toFixed(2)} ({item.spreadPercent?.toFixed(2)}%)</Text>
                 </View>
             </View>
 
             <View style={styles.rightCol}>
-                <Text style={styles.price}>{item.lastPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>
+                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6}}>
+                    <Text style={[styles.price, { color: item.lastSide === 'sell' ? Theme.colors.sell : Theme.colors.buy }]}>
+                        {item.lastPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </Text>
+                    <Text style={{ fontSize: 16, marginLeft: 4, color: item.lastSide === 'sell' ? Theme.colors.sell : Theme.colors.buy }}>
+                        {item.lastSide === 'sell' ? '↓' : '↑'}
+                    </Text>
+                </View>
                 <View style={[
                     styles.changeBadge,
                     {
@@ -139,8 +146,6 @@ const styles = StyleSheet.create({
     price: {
         fontSize: 17,
         fontFamily: Theme.typography.bold.fontFamily,
-        color: Theme.colors.text,
-        marginBottom: 6,
         fontVariant: ['tabular-nums'],
         letterSpacing: 0.5
     },

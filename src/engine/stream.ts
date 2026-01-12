@@ -123,11 +123,22 @@ export class MarketStream {
         this.generator = null;
 
         const db = await getDb();
+
+        const favRows = await db.getAllAsync<{ id: string }>('SELECT id FROM markets WHERE is_favorite = 1');
+        const favorites = favRows.map(r => r.id);
+
         await clearDatabase(db);
         await seedDatabase(db, true);
 
-        await this.load();
+        if (favorites.length > 0) {
+            const placeholders = favorites.map(() => '?').join(',');
+            await db.runAsync(
+                `UPDATE markets SET is_favorite = 1 WHERE id IN (${placeholders})`,
+                favorites
+            );
+        }
 
+        await this.load();
 
         this.notify();
     }

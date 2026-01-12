@@ -28,24 +28,28 @@ export const getPriceAtTime = async (
     return 1.0;
   }
 
+  const fetchPrice = async (mId: string): Promise<number> => {
+      const trade = await db.getFirstAsync<{ price: number }>(
+        'SELECT price FROM trades WHERE market_id = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 1',
+        [mId, timestamp]
+      );
+      if (trade) return trade.price;
+
+      const market = await db.getFirstAsync<{ initialLastPrice: number }>(
+          'SELECT initialLastPrice FROM markets WHERE id = ?',
+          [mId]
+      );
+      return market?.initialLastPrice || 0;
+  };
+
   if (asset === 'NGN') {
-    const trade = await db.getFirstAsync<{ price: number }>(
-      'SELECT price FROM trades WHERE market_id = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 1',
-      ['USDT-NGN', timestamp]
-    );
-    if (trade && trade.price > 0) {
-      return 1.0 / trade.price;
-    }
-    return 0;
+    const price = await fetchPrice('USDT-NGN');
+    return price > 0 ? (1.0 / price) : 0;
   }
 
   const marketId = `${asset}-USDT`;
-  const trade = await db.getFirstAsync<{ price: number }>(
-    'SELECT price FROM trades WHERE market_id = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 1',
-    [marketId, timestamp]
-  );
-
-  return trade?.price || 0;
+  const price = await fetchPrice(marketId);
+  return price;
 };
 
 /**
