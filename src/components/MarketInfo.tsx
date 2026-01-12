@@ -2,8 +2,19 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Theme } from '../constants/Theme';
 
+import { getDb } from '../db/schema';
+
 export default function MarketInfo({ marketId }: { marketId: string }) {
   const [base, quote] = marketId.split('-');
+  const [info, setInfo] = React.useState<any>(null);
+
+  React.useEffect(() => {
+      (async () => {
+          const db = await getDb();
+          const data = await db.getFirstAsync('SELECT * FROM markets WHERE id = ?', [marketId]);
+          setInfo(data);
+      })();
+  }, [marketId]);
 
   return (
     <View style={styles.container}>
@@ -16,22 +27,22 @@ export default function MarketInfo({ marketId }: { marketId: string }) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Market Statistics</Text>
+        <Text style={styles.sectionTitle}>Contract Specifications</Text>
         <View style={styles.statRow}>
-          <Text style={styles.statLabel}>24h Volume</Text>
-          <Text style={styles.statValue}>1,245,392.55 {quote}</Text>
+          <Text style={styles.statLabel}>Base Asset</Text>
+          <Text style={styles.statValue}>{info?.baseAsset || base}</Text>
         </View>
         <View style={styles.statRow}>
-          <Text style={styles.statLabel}>Market Cap</Text>
-          <Text style={styles.statValue}>$420.5M</Text>
+          <Text style={styles.statLabel}>Quote Asset</Text>
+          <Text style={styles.statValue}>{info?.quoteAsset || quote}</Text>
         </View>
         <View style={styles.statRow}>
-          <Text style={styles.statLabel}>Circulating Supply</Text>
-          <Text style={styles.statValue}>125,000,000 {base}</Text>
+          <Text style={styles.statLabel}>Tick Size</Text>
+          <Text style={styles.statValue}>{info?.tickSize || '-'}</Text>
         </View>
         <View style={styles.statRow}>
-          <Text style={styles.statLabel}>All Time High</Text>
-          <Text style={styles.statValue}>$1,250.00</Text>
+          <Text style={styles.statLabel}>Min Order Size</Text>
+          <Text style={styles.statValue}>{info?.minOrderSize || '-'}</Text>
         </View>
       </View>
     </View>

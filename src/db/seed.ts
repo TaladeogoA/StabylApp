@@ -44,7 +44,10 @@ export const clearDatabase = async (db: SQLite.SQLiteDatabase) => {
 };
 
 export const seedDatabase = async (db: SQLite.SQLiteDatabase, force: boolean = false) => {
-  const marketsCount = await db.getFirstAsync<{ count: number }>('SELECT count(*) as count FROM markets');
+    const marketsCount = await db.getFirstAsync<{ count: number }>('SELECT count(*) as count FROM markets');
+
+  await db.runAsync('DELETE FROM trades');
+
 
   if (!force && marketsCount && marketsCount.count > 0) {
     console.log('[DB] DB already seeded');
@@ -83,12 +86,14 @@ export const seedDatabase = async (db: SQLite.SQLiteDatabase, force: boolean = f
           }
       }
 
+      /*
       for (const t of tradesSeed) {
            await db.runAsync(
                'INSERT INTO trades (id, market_id, price, size, side, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
                [t.tradeId || `seed_${t.market}_${t.id}`, t.market || 'UNKNOWN', t.price, t.size, t.side, t.ts]
            );
       }
+      */
   });
 
   console.log('[DB] Seed Complete');

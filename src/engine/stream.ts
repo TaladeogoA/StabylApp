@@ -63,7 +63,7 @@ export class MarketStream {
 
         this.runningPromise = (async () => {
             const db = await getDb();
-            const baseDelay = 50;
+            const baseDelay = 10;
 
             while (this.status === 'playing') {
                 const start = Date.now();

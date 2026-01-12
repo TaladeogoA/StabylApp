@@ -20,15 +20,15 @@ export default function MarketsScreen({ navigation }: any) {
       const db = await getDb();
       try {
           const rows = await db.getAllAsync<MarketRow>(`
-            SELECT m.id, m.ticker, m.is_favorite,
+            SELECT m.id, m.ticker, m.is_favorite, m.initialLastPrice, m.initialChange24h,
             (SELECT price FROM trades WHERE market_id = m.id ORDER BY timestamp DESC LIMIT 1) as lastPrice
             FROM markets m
           `);
 
           const data = rows.map(r => ({
               ...r,
-              lastPrice: r.lastPrice || 0,
-              change24h: isPlaying ? (Math.floor(Math.random() * 1000) / 100 - 5) : 0
+              lastPrice: r.lastPrice || r.initialLastPrice || 0,
+              change24h: r.initialChange24h || 0
           }));
           setMarkets(data);
       } catch (e) {
@@ -62,14 +62,6 @@ export default function MarketsScreen({ navigation }: any) {
 
       <ScreenHeader
           title="Markets"
-        //   rightElement={
-        //       <TouchableOpacity
-        //           onPress={reset}
-        //           style={{ padding: 8, backgroundColor: Theme.colors.surfaceHighlight, borderRadius: 8 }}
-        //       >
-        //           <Text style={{ color: Theme.colors.textSecondary, fontFamily: Theme.typography.medium.fontFamily }}>Reset Data</Text>
-        //       </TouchableOpacity>
-        //   }
       />
 
       <View style={styles.listHeader}>

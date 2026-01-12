@@ -35,11 +35,11 @@ export default function RecentTrades({ marketId }: { marketId: string }) {
 
   const fetchTrades = async () => {
     const db = await getDb();
-    const rows = await db.getAllAsync<TradeRow>(
-        'SELECT id, price, size, side, timestamp FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 20',
-        [marketId]
-    );
-    setTrades(rows);
+      const data = await db.getAllAsync<TradeRow>(
+          'SELECT id, price, size, side, timestamp FROM trades WHERE market_id = ? ORDER BY timestamp DESC LIMIT 20',
+          [marketId]
+      );
+      setTrades(data);
   };
 
   useEffect(() => {

@@ -52,7 +52,9 @@ export interface MarketRow {
     ticker: string;
     lastPrice: number;
     change24h: number;
-    is_favorite: number;
+    is_favorite: boolean;
+    initialLastPrice?: number;
+    initialChange24h?: number;
 }
 
 export interface OrderRow {
