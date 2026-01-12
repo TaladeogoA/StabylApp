@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MarketInfo from '../components/MarketInfo';
 import OrderBook from '../components/OrderBook';
 import RecentTrades from '../components/RecentTrades';
+import { StreamControls } from '../components/StreamControls';
 import TabSwitcher from '../components/TabSwitcher';
 import { Theme } from '../constants/Theme';
 import { getDb } from '../db/schema';
@@ -90,22 +91,7 @@ export default function MarketDetailScreen({ route, navigation }: any) {
           <Ionicons name="chevron-back" size={28} color={Theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{marketId.replace('-', ' / ')}</Text>
-        <TouchableOpacity
-          onPress={status === 'finished' ? replay : togglePlay}
-          style={styles.iconButton}
-        >
-          <Ionicons
-            name={
-              status === 'finished'
-                ? 'refresh-circle'
-                : status === 'playing'
-                ? 'pause-circle'
-                : 'play-circle'
-            }
-            size={28}
-            color={Theme.colors.accent}
-          />
-        </TouchableOpacity>
+        <StreamControls />
       </BlurView>
 
       <View style={styles.heroSection}>

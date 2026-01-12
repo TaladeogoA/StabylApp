@@ -4,6 +4,7 @@ import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MarketRowItem from '../components/MarketRowItem';
 import ScreenHeader from '../components/ScreenHeader';
+import { StreamControls } from '../components/StreamControls';
 import { Theme } from '../constants/Theme';
 import { fetchMarketSummaries } from '../db/marketQueries';
 import { getDb } from '../db/schema';
@@ -57,6 +58,7 @@ export default function MarketsScreen({ navigation }: any) {
 
       <ScreenHeader
           title="Markets"
+          rightElement={<StreamControls size={24} />}
       />
 
       <View style={styles.listHeader}>
