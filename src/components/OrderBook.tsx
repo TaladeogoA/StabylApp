@@ -11,7 +11,6 @@ interface OrderBookRow {
 }
 
 const DepthBar = ({ width, bg, isLeft, isRight }: { width: number, bg: string, isLeft?: boolean, isRight?: boolean }) => {
-    // Animate width changes smoothly
     const rStyle = useAnimatedStyle(() => {
         return {
             width: withTiming(`${width}%`, { duration: 300 })
@@ -41,7 +40,6 @@ export default function OrderBook({ marketId }: { marketId: string }) {
 
   const fetchOrderBook = async () => {
       const db = await getDb();
-      // Fetch data as before
       const asksData = await db.getAllAsync<OrderBookRow>(
           'SELECT price, size FROM order_book WHERE market_id = ? AND side = ? ORDER BY price ASC LIMIT 15',
           [marketId, 'ask']

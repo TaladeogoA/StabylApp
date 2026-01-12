@@ -1,3 +1,4 @@
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -47,9 +48,30 @@ function MainTabs() {
            },
        }}
     >
-      <Tab.Screen name="Markets" component={MarketsScreen} options={{ headerShown: false }} />
-      <Tab.Screen name="Orders" component={OrdersScreen} options={{ headerShown: false }} />
-      <Tab.Screen name="Wallet" component={WalletScreen} options={{ headerShown: false }} />
+      <Tab.Screen
+        name="Markets"
+        component={MarketsScreen}
+        options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size, focused }) => <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} size={size} color={color} />
+        }}
+      />
+      <Tab.Screen
+        name="Orders"
+        component={OrdersScreen}
+        options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size, focused }) => <MaterialCommunityIcons name={focused ? "swap-horizontal-circle" : "swap-horizontal-circle-outline"} size={size} color={color} />
+        }}
+      />
+      <Tab.Screen
+        name="Wallet"
+        component={WalletScreen}
+        options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size, focused }) => <Ionicons name={focused ? "wallet" : "wallet-outline"} size={size} color={color} />
+        }}
+      />
     </Tab.Navigator>
   );
 }

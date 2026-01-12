@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MarketRowItem from '../components/MarketRowItem';
 import ScreenHeader from '../components/ScreenHeader';
@@ -62,14 +62,14 @@ export default function MarketsScreen({ navigation }: any) {
 
       <ScreenHeader
           title="Markets"
-          rightElement={
-              <TouchableOpacity
-                  onPress={reset}
-                  style={{ padding: 8, backgroundColor: Theme.colors.surfaceHighlight, borderRadius: 8 }}
-              >
-                  <Text style={{ color: Theme.colors.textSecondary, fontFamily: Theme.typography.medium.fontFamily }}>Reset Data</Text>
-              </TouchableOpacity>
-          }
+        //   rightElement={
+        //       <TouchableOpacity
+        //           onPress={reset}
+        //           style={{ padding: 8, backgroundColor: Theme.colors.surfaceHighlight, borderRadius: 8 }}
+        //       >
+        //           <Text style={{ color: Theme.colors.textSecondary, fontFamily: Theme.typography.medium.fontFamily }}>Reset Data</Text>
+        //       </TouchableOpacity>
+        //   }
       />
 
       <View style={styles.listHeader}>

@@ -1,15 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../constants/Theme';
 
-interface TabItem {
-    key: string;
-    icon: keyof typeof Ionicons.glyphMap;
-}
-
 interface TabSwitcherProps {
-    tabs: TabItem[];
+    tabs: string[];
     activeTab: string;
     onTabChange: (tab: string) => void;
 }
@@ -18,18 +12,14 @@ export default function TabSwitcher({ tabs, activeTab, onTabChange }: TabSwitche
   return (
     <View style={styles.container}>
       {tabs.map(tab => {
-          const isActive = tab.key === activeTab;
+          const isActive = tab === activeTab;
           return (
               <TouchableOpacity
-                key={tab.key}
+                key={tab}
                 style={[styles.tab, isActive && styles.activeTab]}
-                onPress={() => onTabChange(tab.key)}
+                onPress={() => onTabChange(tab)}
               >
-                  <Ionicons
-                    name={tab.icon}
-                    size={20}
-                    color={isActive ? Theme.colors.accent : Theme.colors.textSecondary}
-                  />
+                  <Text style={[styles.text, isActive && styles.activeText]}>{tab}</Text>
                   {isActive && <View style={styles.indicator} />}
               </TouchableOpacity>
           );

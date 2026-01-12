@@ -52,12 +52,20 @@ export default function GlassTabBar({ state, descriptors, navigation }: BottomTa
               onLongPress={onLongPress}
               style={styles.tab}
             >
-              <Text style={[
-                  styles.label,
-                  { color: isFocused ? Theme.colors.accent : Theme.colors.textSecondary }
-              ]}>
-                {label.toString()}
-              </Text>
+              {options.tabBarIcon ? (
+                  options.tabBarIcon({
+                      focused: isFocused,
+                      color: isFocused ? Theme.colors.accent : Theme.colors.textSecondary,
+                      size: 24
+                  })
+              ) : (
+                  <Text style={[
+                      styles.label,
+                      { color: isFocused ? Theme.colors.accent : Theme.colors.textSecondary }
+                  ]}>
+                    {label.toString()}
+                  </Text>
+              )}
               {isFocused && <View style={styles.indicator} />}
             </TouchableOpacity>
           );
@@ -73,7 +81,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(3, 5, 12, 0.7)', // Semi-transparent brand background
+    backgroundColor: 'rgba(3, 5, 12, 0.7)',
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
