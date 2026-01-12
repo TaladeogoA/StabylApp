@@ -56,9 +56,14 @@ export default function MarketDetailScreen({ route, navigation }: any) {
               <Ionicons name="chevron-back" size={28} color={Theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{marketId.replace('-', ' / ')}</Text>
-          <TouchableOpacity onPress={status === 'finished' ? replay : togglePlay} style={styles.iconButton}>
-              <Ionicons name={status === 'finished' ? "refresh-circle" : (isPlaying ? "pause-circle" : "play-circle")} size={28} color={Theme.colors.accent} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TouchableOpacity onPress={replay} style={styles.iconButton}>
+                  <Ionicons name="refresh-circle" size={28} color={Theme.colors.accent} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={togglePlay} style={styles.iconButton}>
+                  <Ionicons name={isPlaying ? "pause-circle" : "play-circle"} size={28} color={Theme.colors.accent} />
+              </TouchableOpacity>
+          </View>
        </BlurView>
 
        <View style={styles.heroSection}>

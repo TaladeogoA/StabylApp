@@ -32,11 +32,8 @@ const tradesSeed: TradeData[] = [
   ...tradesUsdcNgnRaw,
 ];
 
-
-
-// Wipe dynamic data so we can restart the simulation fresh
 export const clearDatabase = async (db: SQLite.SQLiteDatabase) => {
-    console.log('[DB] 🧹 Clearing database...');
+    console.log('[DB] Clearing DB...');
     await db.withTransactionAsync(async () => {
         await db.runAsync('DELETE FROM trades');
         await db.runAsync('DELETE FROM order_book');
@@ -46,18 +43,15 @@ export const clearDatabase = async (db: SQLite.SQLiteDatabase) => {
     });
 };
 
-// Populate the database with initial static data (assets, markets)
-// The 'force' flag is used by the Reset button to ensure we re-seed even if data exists
 export const seedDatabase = async (db: SQLite.SQLiteDatabase, force: boolean = false) => {
   const marketsCount = await db.getFirstAsync<{ count: number }>('SELECT count(*) as count FROM markets');
 
-  // If we have data and aren't forcing a reset, skip seeding to save time
   if (!force && marketsCount && marketsCount.count > 0) {
-    console.log('[DB] ✅ Database already seeded');
+    console.log('[DB] DB already seeded');
     return;
   }
 
-  console.log('[DB] 🌱 Seeding initial data...');
+  console.log('[DB] Seeding initial data...');
   await db.withTransactionAsync(async () => {
       for (const m of marketsSeed) {
           await db.runAsync(
@@ -97,5 +91,5 @@ export const seedDatabase = async (db: SQLite.SQLiteDatabase, force: boolean = f
       }
   });
 
-  console.log('[DB] ✅ Seed Complete');
+  console.log('[DB] Seed Complete');
 };

@@ -46,6 +46,8 @@ export class MarketStream {
     private generator: AsyncGenerator<string, void, unknown> | null = null;
     private status: StreamState = 'paused';
     private pointer: number = 0;
+    private runningPromise: Promise<void> | null = null;
+
 
     private listeners = new Set<Listener>();
 
@@ -55,51 +57,54 @@ export class MarketStream {
         this.status = 'playing';
         this.notify();
 
-        const db = await getDb();
-        const baseDelay = 50;
-
         if (!this.generator) {
-
              await this.load();
         }
 
-        while (this.status === 'playing') {
-            const start = Date.now();
+        this.runningPromise = (async () => {
+            const db = await getDb();
+            const baseDelay = 50;
 
-            try {
-                if (!this.generator) break;
+            while (this.status === 'playing') {
+                const start = Date.now();
 
-                const { value, done } = await this.generator.next();
+                try {
+                    if (!this.generator) break;
 
-                if (done) {
+                    const { value, done } = await this.generator.next();
 
-                    this.status = 'finished';
+                    if (done) {
+                        this.status = 'finished';
+                        this.notify();
+                        break;
+                    }
+
+                    if (value) {
+                        const event = JSON.parse(value) as StreamEvent;
+                        await this.processEvent(db, event);
+                        this.pointer++;
+                        if (this.pointer % 50 === 0) {}
+                    }
+
+                } catch (e) {
+                    console.error("[Stream] Stream Error", e);
+                    this.status = 'paused';
                     this.notify();
                     break;
                 }
 
-                if (value) {
-                    const event = JSON.parse(value) as StreamEvent;
-                    await this.processEvent(db, event);
-                    this.pointer++;
-                    if (this.pointer % 50 === 0) {}
+                const elapsed = Date.now() - start;
+                const targetDelay = baseDelay / speed;
+                const waitTime = Math.max(0, targetDelay - elapsed);
+
+                if (waitTime > 0 && this.status === 'playing') {
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
                 }
-
-            } catch (e) {
-                console.error("[Stream] Stream Error", e);
-                this.status = 'paused';
-                this.notify();
-                break;
             }
+        })();
 
-            const elapsed = Date.now() - start;
-            const targetDelay = baseDelay / speed;
-            const waitTime = Math.max(0, targetDelay - elapsed);
-
-            if (waitTime > 0) {
-                await new Promise(resolve => setTimeout(resolve, waitTime));
-            }
-        }
+        await this.runningPromise;
+        this.runningPromise = null;
     }
 
     pause() {
@@ -109,8 +114,11 @@ export class MarketStream {
     }
 
     async reset() {
-
         this.status = 'paused';
+        if (this.runningPromise) {
+            await this.runningPromise;
+        }
+
         this.pointer = 0;
         this.generator = null;
 
@@ -134,7 +142,7 @@ export class MarketStream {
 
 
             this.generator = readNdjsonLines(asset.localUri);
-            this.notify(); // Notify listeners that we are loaded
+            this.notify();
         } catch (e) {
             console.error('[Stream] Failed to load stream:', e);
         }
